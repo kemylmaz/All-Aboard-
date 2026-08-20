@@ -58,3 +58,6 @@ Desktop.ini
 
 # Claude / ajan yerel ayarlari repoya girmez
 .claude/
+
+# Kok kilit dosyasi: platforma ozel ikili paketler yuzunden tasinmiyor (bkz. package.json)
+/package-lock.json

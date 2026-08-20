@@ -1,8 +1,10 @@
 {
   "name": "minibus-tycoon",
   "private": true,
-  "description": "Oyun frontend/ altinda. Cloudflare Workers Builds bagimlilik kurulumunu depo kokunde calistiriyor; bu paket kokun kurulabilir olmasi icin var ve isi frontend workspace'ine devrediyor.",
-  "workspaces": ["frontend"],
+  "description": "Oyun frontend/ altinda. Cloudflare Workers Builds bagimlilik kurulumunu depo kokunde calistiriyor; bu paket kokun kurulabilir olmasi icin var ve isi frontend workspace ine devrediyor. Kok kilit dosyasi bilerek tutulmuyor: Windows ta uretilen bir kilit Linux ikili paketlerini (ast-grep, esbuild, workerd, swc) icermiyor ve npm ci build makinesinde bunlari kuramiyor.",
+  "workspaces": [
+    "frontend"
+  ],
   "scripts": {
     "build": "npm --workspace frontend run build",
     "build:cf": "npm --workspace frontend exec opennextjs-cloudflare build",
