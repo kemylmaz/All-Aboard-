@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { createCompany, fetchProgression, type CreateCompanyInput } from "./api";
+import { IS_DEMO, readDemoBootstrap, writeDemoBootstrap } from "./demo";
 import { getPlayerId } from "./playerId";
 import { useProgressionStore } from "./progressionStore";
 import { LocaleHydrator, t as translateStatic, useLocaleStore, useT } from "./i18n";
@@ -47,6 +48,11 @@ export function CompanyGate({ children }: { children: React.ReactNode }) {
     const playerId = getPlayerId();
     if (!playerId) return;
     setLoading(true);
+    // Demoda ilerleme sunucudan degil, bu tarayicinin kendi kaydindan gelir.
+    if (IS_DEMO) {
+      setBootstrap(readDemoBootstrap());
+      return;
+    }
     fetchProgression(playerId).then(setBootstrap).catch((reason: unknown) => {
       setError(reason instanceof Error ? reason.message : translateStatic("company.loadError"));
     });
@@ -59,6 +65,26 @@ export function CompanyGate({ children }: { children: React.ReactNode }) {
     setSubmitting(true);
     setError(null);
     try {
+      if (IS_DEMO) {
+        const current = readDemoBootstrap();
+        setBootstrap(
+          writeDemoBootstrap({
+            ...current,
+            company: {
+              id: "demo-company",
+              name: form.name.trim(),
+              emblemId: form.emblemId,
+              primaryColor: form.primaryColor,
+              secondaryColor: form.secondaryColor,
+              strategy: form.strategy,
+              starterBusId: form.starterBusId,
+              reputation: 0,
+              skills: {},
+            },
+          }),
+        );
+        return;
+      }
       setBootstrap(await createCompany(playerId, { ...form, name: form.name.trim() }));
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : translateStatic("company.createError"));

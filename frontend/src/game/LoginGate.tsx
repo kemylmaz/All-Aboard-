@@ -7,12 +7,20 @@ import { getAuthToken, getPlayerId, setAuthToken, setPlayerId } from "./playerId
 import { setCachedUsername } from "./username";
 import { markTutorialRequired } from "./tutorialStore";
 import { LocaleHydrator, useLocaleStore, useT } from "./i18n";
+import { IS_DEMO, seedDemoSession } from "./demo";
 
 export function LoginGate({ children }: { children: React.ReactNode }) {
   const t = useT();
   const locale = useLocaleStore((state) => state.locale);
   const setLocale = useLocaleStore((state) => state.setLocale);
-  const [loggedIn, setLoggedIn] = useState(() => getPlayerId() !== null && getAuthToken() !== null);
+  // Demoda hesap yok: oturum yerelde açılır ve giriş ekranı hiç görünmez.
+  const [loggedIn, setLoggedIn] = useState(() => {
+    if (IS_DEMO) {
+      seedDemoSession();
+      return true;
+    }
+    return getPlayerId() !== null && getAuthToken() !== null;
+  });
   const [username, setUsernameInput] = useState("");
   const [password, setPasswordInput] = useState("");
   const [error, setError] = useState<string | null>(null);

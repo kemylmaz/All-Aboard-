@@ -10,7 +10,12 @@
     "check:i18n": "node scripts/check-i18n.mjs",
     "check:driving": "node scripts/check-driving.mjs",
     "check:economy": "node scripts/check-economy-sync.mjs",
-    "check:grading": "node scripts/check-grading.mjs"
+    "check:grading": "node scripts/check-grading.mjs",
+    "build:demo": "next build",
+    "preview:cf": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy:cf": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "predev": "node scripts/sync-shared.mjs",
+    "prebuild": "node scripts/sync-shared.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
@@ -23,6 +28,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "^1.20.2",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -31,6 +37,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.11",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.125.0"
   }
 }

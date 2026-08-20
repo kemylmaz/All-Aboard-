@@ -2,12 +2,27 @@
 
 import { getAuthToken } from "./playerId";
 
+import { DemoOfflineError, IS_DEMO } from "./demo";
+
 // Backend'in adresi — .env.local'de NEXT_PUBLIC_API_BASE_URL ile ezilebilir.
 const configuredApiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
-if (!configuredApiBaseUrl && process.env.NODE_ENV === "production") {
+if (!configuredApiBaseUrl && !IS_DEMO && process.env.NODE_ENV === "production") {
   throw new Error("Production build requires NEXT_PUBLIC_API_BASE_URL.");
 }
 const API_BASE_URL = (configuredApiBaseUrl || "http://localhost:5000").replace(/\/+$/, "");
+
+/**
+ * Demo modunda hicbir istek aga cikmaz; cagrilar aninda reddedilir. Kayit ve
+ * ilerleme yollari bu hatayi zaten yakalayip yerel duruma dusuyor, agi
+ * beklemek yalnizca oyunu yavaslatirdi.
+ */
+const apiFetch: typeof fetch = IS_DEMO
+  ? (input) => {
+      const url =
+        typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+      return Promise.reject(new DemoOfflineError(url.replace(API_BASE_URL, "") || url));
+    }
+  : (...args) => fetch(...args);
 
 export interface SaveResponse extends GameSnapshot {
   savedAtUtc: string;
@@ -20,7 +35,7 @@ export async function fetchSave(
   includeOfflineIncome = true,
 ): Promise<SaveResponse | null> {
   const query = includeOfflineIncome ? "" : "?includeOfflineIncome=false";
-  const res = await fetch(`${API_BASE_URL}/api/saves/${playerId}${query}`, {
+  const res = await apiFetch(`${API_BASE_URL}/api/saves/${playerId}${query}`, {
     headers: authHeaders(),
   });
   if (res.status === 404) return null;
@@ -29,7 +44,7 @@ export async function fetchSave(
 }
 
 export async function pushSave(playerId: string, snapshot: GameSnapshot): Promise<SaveResponse> {
-  const res = await fetch(`${API_BASE_URL}/api/saves/${playerId}`, {
+  const res = await apiFetch(`${API_BASE_URL}/api/saves/${playerId}`, {
     method: "PUT",
     headers: jsonAuthHeaders(),
     body: JSON.stringify(snapshot),
@@ -44,7 +59,7 @@ export async function pushSave(playerId: string, snapshot: GameSnapshot): Promis
  * kontrat/vardiya kayıtları) sunucuda silinir. Geri alınamaz.
  */
 export async function resetGame(playerId: string): Promise<void> {
-  const res = await fetch(`${API_BASE_URL}/api/saves/${playerId}/reset`, {
+  const res = await apiFetch(`${API_BASE_URL}/api/saves/${playerId}/reset`, {
     method: "POST",
     headers: authHeaders(),
   });
@@ -58,7 +73,7 @@ export interface SpinWheelResponse {
 }
 
 export async function spinWheel(playerId: string, gameDay: number): Promise<SpinWheelResponse> {
-  const res = await fetch(`${API_BASE_URL}/api/chance/wheel/spin/${playerId}`, {
+  const res = await apiFetch(`${API_BASE_URL}/api/chance/wheel/spin/${playerId}`, {
     method: "POST",
     headers: jsonAuthHeaders(),
     body: JSON.stringify({ gameDay, clientRequestId: createClientRequestId() }),
@@ -78,7 +93,7 @@ export async function playPlate(
   gameDay: number,
   guess: "tek" | "cift"
 ): Promise<PlayPlateResponse> {
-  const res = await fetch(`${API_BASE_URL}/api/chance/plate/play/${playerId}`, {
+  const res = await apiFetch(`${API_BASE_URL}/api/chance/plate/play/${playerId}`, {
     method: "POST",
     headers: jsonAuthHeaders(),
     body: JSON.stringify({ gameDay, guess, clientRequestId: createClientRequestId() }),
@@ -89,7 +104,7 @@ export async function playPlate(
 }
 
 export async function buyLotteryTicket(playerId: string, gameDay: number): Promise<SpinWheelResponse> {
-  const res = await fetch(`${API_BASE_URL}/api/chance/lottery/ticket/${playerId}`, {
+  const res = await apiFetch(`${API_BASE_URL}/api/chance/lottery/ticket/${playerId}`, {
     method: "POST",
     headers: jsonAuthHeaders(),
     body: JSON.stringify({ gameDay, clientRequestId: createClientRequestId() }),
@@ -116,7 +131,7 @@ async function playMiniChance(
   gameId: "envelope" | "coupon" | "tombala",
   fallbackMessage: string
 ): Promise<SpinWheelResponse> {
-  const res = await fetch(`${API_BASE_URL}/api/chance/${gameId}/play/${playerId}`, {
+  const res = await apiFetch(`${API_BASE_URL}/api/chance/${gameId}/play/${playerId}`, {
     method: "POST",
     headers: jsonAuthHeaders(),
     body: JSON.stringify({ gameDay, clientRequestId: createClientRequestId() }),
@@ -156,7 +171,7 @@ export async function login(
   username: string,
   password: string
 ): Promise<{ ok: true; result: LoginResult } | { ok: false; messageKey: string }> {
-  const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+  const res = await apiFetch(`${API_BASE_URL}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password }),
@@ -213,7 +228,7 @@ export interface CreateCompanyInput {
 }
 
 async function progressionRequest(playerId: string, path = "", init?: RequestInit): Promise<PlayerBootstrap> {
-  const response = await fetch(`${API_BASE_URL}/api/progression/${playerId}${path}`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/progression/${playerId}${path}`, {
     ...init,
     headers: init?.body ? jsonAuthHeaders() : authHeaders(),
   });
@@ -227,7 +242,7 @@ export function fetchProgression(playerId: string) {
 }
 
 export async function createCompany(playerId: string, input: CreateCompanyInput): Promise<PlayerBootstrap> {
-  const response = await fetch(`${API_BASE_URL}/api/companies/${playerId}`, {
+  const response = await apiFetch(`${API_BASE_URL}/api/companies/${playerId}`, {
     method: "POST",
     headers: jsonAuthHeaders(),
     body: JSON.stringify(input),
@@ -268,7 +283,7 @@ export interface SubmitShiftResponse {
 }
 
 export async function submitShiftResult(playerId: string, input: SubmitShiftInput): Promise<SubmitShiftResponse> {
-  const res = await fetch(`${API_BASE_URL}/api/shifts/${playerId}`, {
+  const res = await apiFetch(`${API_BASE_URL}/api/shifts/${playerId}`, {
     method: "POST",
     headers: jsonAuthHeaders(),
     body: JSON.stringify(input),
@@ -298,7 +313,7 @@ export interface ResolveContractResponse {
 }
 
 export async function resolveContract(playerId: string, input: ResolveContractInput): Promise<ResolveContractResponse> {
-  const res = await fetch(`${API_BASE_URL}/api/contracts/${playerId}/resolve`, {
+  const res = await apiFetch(`${API_BASE_URL}/api/contracts/${playerId}/resolve`, {
     method: "POST",
     headers: jsonAuthHeaders(),
     body: JSON.stringify(input),
@@ -328,7 +343,7 @@ export interface DailyEvent {
 }
 
 export async function fetchTodayEvent(playerId: string, gameDay: number): Promise<DailyEvent> {
-  const res = await fetch(`${API_BASE_URL}/api/events/${playerId}/today?gameDay=${gameDay}`, {
+  const res = await apiFetch(`${API_BASE_URL}/api/events/${playerId}/today?gameDay=${gameDay}`, {
     headers: authHeaders(),
   });
   const data = await res.json().catch(() => ({}));
@@ -337,7 +352,7 @@ export async function fetchTodayEvent(playerId: string, gameDay: number): Promis
 }
 
 export async function logout(playerId: string): Promise<void> {
-  const res = await fetch(`${API_BASE_URL}/api/auth/logout/${encodeURIComponent(playerId)}`, {
+  const res = await apiFetch(`${API_BASE_URL}/api/auth/logout/${encodeURIComponent(playerId)}`, {
     method: "POST",
     headers: authHeaders(),
     signal: AbortSignal.timeout(5000),
@@ -393,14 +408,14 @@ export interface ActionResult {
 }
 
 export async function fetchCityPublic(username: string): Promise<CityPublic | null> {
-  const res = await fetch(`${API_BASE_URL}/api/cities/${username}`);
+  const res = await apiFetch(`${API_BASE_URL}/api/cities/${username}`);
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Şehir getirilemedi: ${res.status}`);
   return res.json();
 }
 
 export async function fetchCityEvents(username: string): Promise<CityEvent[]> {
-  const res = await fetch(`${API_BASE_URL}/api/cities/${username}/events`);
+  const res = await apiFetch(`${API_BASE_URL}/api/cities/${username}/events`);
   if (!res.ok) return [];
   return res.json();
 }
@@ -410,7 +425,7 @@ export async function tipCity(
   actorPlayerId: string,
   actorUsername: string | null
 ): Promise<ActionResult> {
-  const res = await fetch(`${API_BASE_URL}/api/cities/${username}/tip`, {
+  const res = await apiFetch(`${API_BASE_URL}/api/cities/${username}/tip`, {
     method: "POST",
     headers: jsonAuthHeaders(),
     body: JSON.stringify({ actorPlayerId, actorUsername }),
@@ -423,7 +438,7 @@ export async function raidCity(
   actorPlayerId: string,
   actorUsername: string | null
 ): Promise<ActionResult> {
-  const res = await fetch(`${API_BASE_URL}/api/cities/${username}/raid`, {
+  const res = await apiFetch(`${API_BASE_URL}/api/cities/${username}/raid`, {
     method: "POST",
     headers: jsonAuthHeaders(),
     body: JSON.stringify({ actorPlayerId, actorUsername }),
@@ -434,7 +449,7 @@ export async function raidCity(
 // ---- Adim 3: arkadas listesi ----
 
 export async function fetchFriends(playerId: string): Promise<Friend[]> {
-  const res = await fetch(`${API_BASE_URL}/api/friends/${playerId}`, {
+  const res = await apiFetch(`${API_BASE_URL}/api/friends/${playerId}`, {
     headers: jsonAuthHeaders(),
   });
   if (!res.ok) return [];
@@ -446,7 +461,7 @@ export async function addFriend(
   playerId: string,
   username: string
 ): Promise<{ ok: true; friend: Friend } | { ok: false; reason: "notFound" | "self" | "duplicate" | "error" }> {
-  const res = await fetch(`${API_BASE_URL}/api/friends/${playerId}`, {
+  const res = await apiFetch(`${API_BASE_URL}/api/friends/${playerId}`, {
     method: "POST",
     headers: jsonAuthHeaders(),
     body: JSON.stringify({ username: username.trim() }),
@@ -459,7 +474,7 @@ export async function addFriend(
 }
 
 export async function removeFriend(playerId: string, username: string): Promise<boolean> {
-  const res = await fetch(`${API_BASE_URL}/api/friends/${playerId}/${encodeURIComponent(username)}`, {
+  const res = await apiFetch(`${API_BASE_URL}/api/friends/${playerId}/${encodeURIComponent(username)}`, {
     method: "DELETE",
     headers: jsonAuthHeaders(),
   });
@@ -490,7 +505,7 @@ export async function sendTelemetry(
   playerId: string,
   payload: TelemetryBatchPayload
 ): Promise<{ accepted: number; duplicates: number; sessionId: string | null; bootstrap: PlayerBootstrap | null }> {
-  const res = await fetch(`${API_BASE_URL}/api/telemetry/${playerId}`, {
+  const res = await apiFetch(`${API_BASE_URL}/api/telemetry/${playerId}`, {
     method: "POST",
     headers: jsonAuthHeaders(),
     body: JSON.stringify(payload),
@@ -504,7 +519,7 @@ export async function sendFeedback(
   playerId: string,
   payload: { category: string; message: string; contextJson: string }
 ): Promise<void> {
-  const res = await fetch(`${API_BASE_URL}/api/feedback/${playerId}`, {
+  const res = await apiFetch(`${API_BASE_URL}/api/feedback/${playerId}`, {
     method: "POST",
     headers: jsonAuthHeaders(),
     body: JSON.stringify(payload),
@@ -554,7 +569,7 @@ export interface AnalyticsPlayer {
 }
 
 export async function fetchAdminAccess(): Promise<boolean> {
-  const res = await fetch(`${API_BASE_URL}/api/admin/access`, {
+  const res = await apiFetch(`${API_BASE_URL}/api/admin/access`, {
     headers: authHeaders(),
     cache: "no-store",
   });
@@ -564,7 +579,7 @@ export async function fetchAdminAccess(): Promise<boolean> {
 }
 
 export async function fetchAnalyticsOverview(): Promise<AnalyticsOverview> {
-  const res = await fetch(`${API_BASE_URL}/api/admin/analytics/overview`, {
+  const res = await apiFetch(`${API_BASE_URL}/api/admin/analytics/overview`, {
     headers: authHeaders(),
     cache: "no-store",
   });
@@ -573,7 +588,7 @@ export async function fetchAnalyticsOverview(): Promise<AnalyticsOverview> {
 }
 
 export async function fetchAnalyticsPlayer(playerId: string): Promise<AnalyticsPlayer | null> {
-  const res = await fetch(`${API_BASE_URL}/api/admin/analytics/players/${encodeURIComponent(playerId)}`, {
+  const res = await apiFetch(`${API_BASE_URL}/api/admin/analytics/players/${encodeURIComponent(playerId)}`, {
     headers: authHeaders(),
     cache: "no-store",
   });

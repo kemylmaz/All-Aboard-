@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useEffect } from "react";
 import { useUiStore } from "./uiStore";
 import { EditorHotkeys } from "./editor/EditorHotkeys";
+import { IS_DEMO } from "./demo";
 import { InteractionHud } from "./InteractionHud";
 import { StopPayoutFx } from "./StopPayoutFx";
 import { DetourPayoutOverlay } from "./DetourPayoutOverlay";
@@ -83,7 +84,8 @@ export function GameHome() {
       <AutoSave />
       <FunnelTelemetry />
       <TabSync />
-      <EditorHotkeys />
+      {/* Demoda seviye editoru hic yuklenmez: leva paneli kendini otomatik acar. */}
+      {!IS_DEMO && <EditorHotkeys />}
       <ManagementHotkeys />
       <StripModeHotkeys />
       <DrivingControls />
@@ -95,7 +97,7 @@ export function GameHome() {
       {!stripMode && <RadioPlayer />}
       {!stripMode && <ChanceGamesPanel />}
       <StripBar />
-      {!stripMode && <EditorPanel />}
+      {!IS_DEMO && !stripMode && <EditorPanel />}
       <StopApproachHud />
       <StopPayoutFx />
       <DetourPayoutOverlay />
