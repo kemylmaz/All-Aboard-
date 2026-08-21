@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "poppanda-game",
+  // Cloudflare'deki proje adi ile ayni: farkli olursa CI kendi adini dayatip uyarir.
+  "name": "all-aboard",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-08-19",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
@@ -8,5 +9,10 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  // Panelin "Connect domain" penceresi alt alan adlarini eslestiremiyor; deploy
+  // sirasinda tanimlanan custom domain hem route'u hem DNS kaydini kendisi kurar.
+  "routes": [
+    { "pattern": "game.poppanda.net", "custom_domain": true }
+  ],
   "observability": { "enabled": true }
 }
