@@ -761,18 +761,41 @@ interface GameState {
  */
 function computeDayUpkeep(
   ownedBusCount: number,
+  unlockedRouteCount: number,
   hiredDriverIds: string[],
   gameDay: number,
 ): UpkeepBreakdown {
   const config = ECONOMY.upkeep;
-  const fleet = Math.max(1, ownedBusCount) * config.busPerDay;
+  const buses = Math.max(1, ownedBusCount);
+  const routes = Math.max(1, unlockedRouteCount);
+
+  const fleet = buses * config.busPerDay;
   const salaries = hiredDriverIds.reduce((total, driverId) => {
     const driver = ECONOMY.drivers.find((d) => d.id === driverId);
     return total + (driver ? getDriverDailySalary(driver) : 0);
   }, 0);
-  const rent = gameDay % config.weeklyRentEveryDays === 0 ? config.weeklyRent : 0;
-  const inspection = gameDay % config.inspectionEveryDays === 0 ? config.inspectionCost : 0;
+  // Kira ve muayene işletmeyle birlikte büyür: sabit tutarken ilk haftasındaki
+  // oyuncuyu eziyor, filosu büyümüş oyuncuda ise hiç hissedilmiyordu.
+  const rent =
+    gameDay % config.weeklyRentEveryDays === 0
+      ? config.weeklyRentBase + (routes - 1) * config.weeklyRentPerRoute
+      : 0;
+  const inspection =
+    gameDay % config.inspectionEveryDays === 0
+      ? config.inspectionBase + (buses - 1) * config.inspectionPerBus
+      : 0;
+
   return { fleet, salaries, rent, inspection, total: fleet + salaries + rent + inspection };
+}
+
+/** Gun basi ekrani bugunun kira/muayene tutarini onceden gosterir. */
+export function upkeepDueToday(
+  ownedBusCount: number,
+  unlockedRouteCount: number,
+  gameDay: number,
+): { rent: number; inspection: number } {
+  const { rent, inspection } = computeDayUpkeep(ownedBusCount, unlockedRouteCount, [], gameDay);
+  return { rent, inspection };
 }
 
 function isNightTime(gameTimeMinutes: number): boolean {
@@ -2460,7 +2483,12 @@ export const useGameStore = create<GameState>((set, get) => {
             .filter((id): id is string => Boolean(id)),
         ),
       ];
-      const upkeep = computeDayUpkeep(s.ownedBuses.length, hiredDriverIds, run.startedAtGameDay);
+      const upkeep = computeDayUpkeep(
+        s.ownedBuses.length,
+        s.unlockedRouteIds.length,
+        hiredDriverIds,
+        run.startedAtGameDay,
+      );
 
       // Rakip firma: ihmal edilen hatta duraklar el degistirir, iyi gun geri kazandirir.
       const rivalOutcome = applyRivalDay(s.rival, s.unlockedRouteIds, run.routeId, s.satisfaction);

@@ -1219,12 +1219,14 @@
     "graceDays": 1
   },
   "upkeep": {
-    "busPerDay": 250,
+    "busPerDay": 150,
     "driverSalaryCharged": true,
     "weeklyRentEveryDays": 7,
-    "weeklyRent": 1500,
+    "weeklyRentBase": 600,
+    "weeklyRentPerRoute": 300,
     "inspectionEveryDays": 14,
-    "inspectionCost": 1200
+    "inspectionBase": 500,
+    "inspectionPerBus": 250
   },
   "rival": {
     "poorDaySatisfaction": 55,

@@ -6,11 +6,19 @@ const economy = JSON.parse(readFileSync("src/shared/economy.json", "utf8"));
 const config = economy.upkeep;
 const salaryOf = (id) => economy.drivers.find((d) => d.id === id)?.dailySalary ?? 0;
 
-function upkeep(busCount, driverIds, gameDay) {
-  const fleet = Math.max(1, busCount) * config.busPerDay;
+function upkeep(busCount, routeCount, driverIds, gameDay) {
+  const buses = Math.max(1, busCount);
+  const routes = Math.max(1, routeCount);
+  const fleet = buses * config.busPerDay;
   const salaries = driverIds.reduce((total, id) => total + salaryOf(id), 0);
-  const rent = gameDay % config.weeklyRentEveryDays === 0 ? config.weeklyRent : 0;
-  const inspection = gameDay % config.inspectionEveryDays === 0 ? config.inspectionCost : 0;
+  const rent =
+    gameDay % config.weeklyRentEveryDays === 0
+      ? config.weeklyRentBase + (routes - 1) * config.weeklyRentPerRoute
+      : 0;
+  const inspection =
+    gameDay % config.inspectionEveryDays === 0
+      ? config.inspectionBase + (buses - 1) * config.inspectionPerBus
+      : 0;
   return { fleet, salaries, rent, inspection, total: fleet + salaries + rent + inspection };
 }
 
@@ -23,34 +31,33 @@ function ok(label, condition) {
 const DAY_TARGET = economy.dayGoals.earnings.targetNet;
 const cheapest = [...economy.drivers].sort((a, b) => a.dailySalary - b.dailySalary)[0];
 
-console.log("SIRADAN GUN:");
-const plain = upkeep(1, [], 3);
-ok(`tek arac, sofursuz: ${plain.total} TL`, plain.total === config.busPerDay);
-ok("kira yok", plain.rent === 0);
-ok("muayene yok", plain.inspection === 0);
-ok("gunluk hedefin yarisindan az", plain.total < DAY_TARGET / 2);
+console.log("ILK HAFTA (1 arac, 1 hat, sofor yok):");
+const plain = upkeep(1, 1, [], 3);
+ok(`siradan gun ${plain.total} TL`, plain.total === config.busPerDay);
+ok("gunluk hedefin onda birinden az", plain.total < DAY_TARGET / 10);
+const firstRent = upkeep(1, 1, [], 7);
+ok(`ilk kira gunu ${firstRent.total} TL`, firstRent.total === config.busPerDay + config.weeklyRentBase);
+ok("ilk kira gunu hedefin ucte birini gecmez", firstRent.total <= DAY_TARGET / 3);
 
-console.log("KIRA GUNU (7. gun):");
-const rentDay = upkeep(1, [], 7);
-ok(`kira tahsil edildi: ${rentDay.rent} TL`, rentDay.rent === config.weeklyRent);
-ok("muayene yok (7 % 14 != 0)", rentDay.inspection === 0);
+console.log("BUYUYEN ISLETME:");
+const grown = upkeep(4, 4, [], 7);
+ok("dort hatta kira dort kat degil, kademeli", grown.rent === config.weeklyRentBase + 3 * config.weeklyRentPerRoute);
+ok("kira isletmeyle birlikte artiyor", grown.rent > firstRent.rent);
+ok("filo gideri arac sayisiyla orantili", grown.fleet === 4 * config.busPerDay);
 
-console.log("MUAYENE GUNU (14. gun):");
-const both = upkeep(1, [], 14);
-ok("14. gun hem kira hem muayene", both.rent > 0 && both.inspection > 0);
-ok("ikisi birden gunluk hedefi asmiyor", both.total < DAY_TARGET);
-
-console.log("FILO BUYUDUKCE:");
-const fleet4 = upkeep(4, [], 3);
-ok(`dort arac: ${fleet4.fleet} TL`, fleet4.fleet === 4 * config.busPerDay);
-ok("arac sayisiyla dogru orantili", fleet4.fleet === plain.fleet * 4);
+console.log("MUAYENE:");
+const inspectSmall = upkeep(1, 1, [], 14);
+const inspectBig = upkeep(4, 1, [], 14);
+ok(`tek aracta ${inspectSmall.inspection} TL`, inspectSmall.inspection === config.inspectionBase);
+ok("dort araca gore artiyor", inspectBig.inspection === config.inspectionBase + 3 * config.inspectionPerBus);
+ok("14. gun hem kira hem muayene", inspectSmall.rent > 0 && inspectSmall.inspection > 0);
+ok("ikisi birden ilk haftada hedefi asmiyor", inspectSmall.total < DAY_TARGET);
 
 console.log("SOFOR MAASI:");
-const withDriver = upkeep(1, [cheapest.id], 3);
+const withDriver = upkeep(1, 1, [cheapest.id], 3);
 ok(`${cheapest.name} maasi kesiliyor: ${withDriver.salaries} TL`, withDriver.salaries === cheapest.dailySalary);
-ok("ayni sofor iki kez sayilmaz", upkeep(1, [cheapest.id], 3).salaries === cheapest.dailySalary);
 ok(
-  "soforlu arac yine de kar birakiyor",
+  "soforlu arac gider dustukten sonra hala kar birakiyor",
   economy.extraBuses.dailyGrossIncome - cheapest.dailySalary - config.busPerDay > 0,
 );
 
