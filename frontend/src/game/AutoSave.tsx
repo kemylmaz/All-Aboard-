@@ -43,6 +43,13 @@ export function AutoSave() {
     let cancelled = false;
     let hydrated = false;
     let saveInFlight: Promise<void> | null = null;
+    /**
+     * Sunucuya en son yazdığımız bakiye. Ziyaretçi bahşişi bunun ÜSTÜNE gelen
+     * fark demektir. Kıyas yerel bakiyeyle yapılırsa, bir kayıt gönderimi
+     * kaçtığında sunucudaki eski (kesinti öncesi) tutar bahşiş sanılır ve
+     * oyuncu ödediği gideri geri alır — para azalabildiği için artık mümkün.
+     */
+    let lastSyncedMoney: number | null = null;
     const localSave = readLocalSave(playerId);
     if (localSave) loadSnapshot(localSave);
 
@@ -50,6 +57,7 @@ export function AutoSave() {
       .then((save) => {
         if (cancelled || !save) return;
         loadSnapshot(save);
+        lastSyncedMoney = save.money;
         writeLocalSave(playerId);
         if (save.offlineIncome > 0) {
           showMoneyToast(save.offlineIncome, "Şoförün sen yokken");
@@ -72,18 +80,22 @@ export function AutoSave() {
         try {
           // Online synchronization must not generate offline-driver income.
           const server = await fetchSave(playerId, false);
-          const localMoney = useGameStore.getState().money;
-          if (server && server.money > localMoney) {
-            const gained = server.money - localMoney;
+          const baseline = lastSyncedMoney ?? useGameStore.getState().money;
+          if (server && server.money > baseline) {
+            const gained = server.money - baseline;
             applyExternalGain(gained);
             showMoneyToast(gained, "Ziyaretçilerin sana");
+            lastSyncedMoney = server.money;
           }
         } catch {
           // The local snapshot protects the session if the API is offline.
         }
 
         try {
-          await pushSave(playerId, useGameStore.getState().getSnapshot());
+          const snapshot = useGameStore.getState().getSnapshot();
+          await pushSave(playerId, snapshot);
+          // Yalnızca gönderim başarılıysa kıyas noktası ilerler.
+          lastSyncedMoney = snapshot.money;
         } catch (error) {
           console.warn("FullFilled: kayıt gönderilemedi", error);
         }
