@@ -454,7 +454,7 @@
         "riskDelta": 0.1,
         "fareDelta": 0,
         "satisfactionDrift": -0.02,
-        "counterCost": 4000
+        "counterCost": 900
       },
       {
         "id": "heatwave",
@@ -463,7 +463,7 @@
         "riskDelta": 0,
         "fareDelta": 0,
         "satisfactionDrift": -0.03,
-        "counterCost": 3000
+        "counterCost": 700
       },
       {
         "id": "breakdown",
@@ -472,7 +472,7 @@
         "riskDelta": 0.05,
         "fareDelta": -0.1,
         "satisfactionDrift": -0.02,
-        "counterCost": 6000
+        "counterCost": 1200
       },
       {
         "id": "rain",
@@ -481,7 +481,7 @@
         "riskDelta": 0.2,
         "fareDelta": 0,
         "satisfactionDrift": -0.01,
-        "counterCost": 3500
+        "counterCost": 900
       },
       {
         "id": "festival",
@@ -490,7 +490,7 @@
         "riskDelta": 0.05,
         "fareDelta": 0.15,
         "satisfactionDrift": 0,
-        "counterCost": 2000
+        "counterCost": 600
       },
       {
         "id": "matchday",
@@ -499,7 +499,7 @@
         "riskDelta": 0.1,
         "fareDelta": 0.1,
         "satisfactionDrift": -0.01,
-        "counterCost": 2500
+        "counterCost": 750
       },
       {
         "id": "policeCheck",
@@ -508,7 +508,7 @@
         "riskDelta": 0.3,
         "fareDelta": 0,
         "satisfactionDrift": 0,
-        "counterCost": 5000
+        "counterCost": 1000
       },
       {
         "id": "schoolRush",
@@ -517,7 +517,7 @@
         "riskDelta": 0,
         "fareDelta": -0.05,
         "satisfactionDrift": -0.01,
-        "counterCost": 2000
+        "counterCost": 450
       }
     ]
   },
