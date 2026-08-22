@@ -6,7 +6,7 @@ import { useGameStore, type DayGoalId } from "./store";
 import { dispatchGameAction } from "./useTabSync";
 import { ROUTE_DEFINITIONS, getRouteGeometry } from "./route";
 import { ECONOMY } from "./economy";
-import { getRouteConfig, recommendDriverForRoute, recommendedVehicleTier, masteryLevelForXp } from "./routeProfile";
+import { getRouteConfig, recommendDriverForRoute, recommendedVehicleTier, masteryLevelForXp, routeRuleId } from "./routeProfile";
 import { useT } from "./i18n";
 import { streakFareMultiplier, useProfileStore } from "./profileStore";
 
@@ -69,6 +69,7 @@ export function DayStartModal() {
   const recommendation = recommendDriverForRoute(routeId);
   const vehicleTier = recommendedVehicleTier(routeId);
   const masteryLevel = masteryLevelForXp(routeMastery[routeId]?.xp ?? 0);
+  const ruleId = routeRuleId(routeId);
 
   const start = () => {
     dispatchGameAction("startDay", { routeId, manual, goalId });
@@ -177,6 +178,13 @@ export function DayStartModal() {
             <div className="mt-1 font-bold text-white/75">
               {t("day.stopCount", { count: getRouteGeometry(routeId).stops.length })}
             </div>
+            {/* Hattın kuralı. Sürerken fark edilen bir mekaniği seçim anında
+                söylemezsek oyuncu onu kural değil, aksilik sanır. */}
+            {ruleId && (
+              <div className="mt-1.5 rounded-md bg-white/8 px-2 py-1.5 font-bold text-sky-200">
+                {t(`route.rule.${ruleId}`)}
+              </div>
+            )}
             <div className="mt-1 text-amber-200">
               {t("route.recommendedDriver", { name: recommendation.driver.name, trait: t(`route.trait.${recommendation.trait}`) })}
             </div>

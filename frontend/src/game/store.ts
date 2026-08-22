@@ -30,7 +30,15 @@ import {
 import { resolveContract, fetchTodayEvent, type DailyEvent } from "./api";
 import { track } from "./telemetry";
 import { getPlayerId } from "./playerId";
-import { getRouteConfig, advanceRouteMastery, type RouteMasteryEntry } from "./routeProfile";
+import {
+  getRouteConfig,
+  advanceRouteMastery,
+  routeDemandFactorAt,
+  routeFareFactorAt,
+  routeSpeedingPenaltyMultiplier,
+  harshBrakePenalty,
+  type RouteMasteryEntry,
+} from "./routeProfile";
 import { useTutorialStore } from "./tutorialStore";
 import { streakFareMultiplier } from "./profileStore";
 
@@ -320,7 +328,7 @@ export interface UpgradeCelebration {
 }
 
 /** Yolcu memnuniyetsizliğinin görünür sebebi. */
-export type MoodReason = "speeding";
+export type MoodReason = "speeding" | "harshBrake";
 /** Sebep etiketi bu kadar saniye ekranda kalır. */
 const MOOD_REASON_VISIBLE_SECONDS = 2.5;
 /** Günün olay kartının duyurulduğu oyun saati (dakika cinsinden): 12:00. */
@@ -1025,6 +1033,8 @@ export const useGameStore = create<GameState>((set, get) => {
 
   function currentPassengerFare(baseFare: number): number {
     const tariff = getTariffInfo(get().gameTimeMinutes).multiplier;
+    // Gece hattı geç saatte iyi öder — riski zaten yüksekti, karşılığı burada.
+    const routeHour = routeFareFactorAt(get().activeRouteId, get().gameTimeMinutes);
     const plan = getServicePlanEffects(get().servicePlan).fare;
     // Faz 7: bugünün şehir olayı (festival/maç bahşişi, arıza kesintisi vb.) ücreti de değiştirir.
     const eventFare = activeEventEffects(get()).fareMultiplier;
@@ -1035,6 +1045,7 @@ export const useGameStore = create<GameState>((set, get) => {
     return (
       baseFare *
       routeFareMultiplier() *
+      routeHour *
       driverFareMultiplier() *
       tariff *
       plan *
@@ -1491,7 +1502,11 @@ export const useGameStore = create<GameState>((set, get) => {
         const { demandMultiplierAtZero: min, demandMultiplierAtHundred: max } = ECONOMY.satisfaction;
         const terminalDemand = getTerminalEffects(s.terminalUpgrades).demandMultiplier;
         // Faz 6: hattın talep çarpanı — gelir çarpanı (wealthMultiplier) dışında ölçülebilir fark.
-        const routeDemand = getRouteConfig(s.activeRouteId).demandMultiplier;
+        // Hattın kendi kuralı: Üniversite hattında sabah pikinde kuyruk patlar,
+        // gün ortasında yarıya iner (bkz. routeProfile > routeDemandFactorAt).
+        const routeDemand =
+          getRouteConfig(s.activeRouteId).demandMultiplier *
+          routeDemandFactorAt(s.activeRouteId, s.gameTimeMinutes);
         // Faz 7: bugünün şehir olayı, sürülen hatta ise talep/memnuniyeti de değiştirir.
         const eventEffects = activeEventEffects(s);
         const demandFactor = (min + (max - min) * (s.satisfaction / 100)) * terminalDemand * routeDemand * eventEffects.demandMultiplier;
@@ -2449,7 +2464,10 @@ export const useGameStore = create<GameState>((set, get) => {
 
         return {
           satisfaction: clampSatisfaction(
-            s.satisfaction - ECONOMY.satisfaction.speedingPenaltyPerSecond * deltaSeconds,
+            s.satisfaction -
+              ECONOMY.satisfaction.speedingPenaltyPerSecond *
+                routeSpeedingPenaltyMultiplier(s.activeRouteId) *
+                deltaSeconds,
           ),
           moodReason: "speeding" as const,
           moodReasonLeft: MOOD_REASON_VISIBLE_SECONDS,
@@ -2542,7 +2560,19 @@ export const useGameStore = create<GameState>((set, get) => {
     // Gosterge hizi her karede GameCanvas'tan gelir. Ayni degerde set etmek
     // gereksiz render tetiklemesin diye 1 km/h esigi altinda yok sayilir.
     setCurrentSpeedKmh: (kmh) =>
-      set((s) => (Math.abs(s.currentSpeedKmh - kmh) < 1 ? s : { currentSpeedKmh: kmh })),
+      set((s) => {
+        if (Math.abs(s.currentSpeedKmh - kmh) < 1) return s;
+        // Hastane hattı sert freni affetmez: ani yavaşlama arkadakileri savurur.
+        // Duraklarda durmak ceza değildir — kural yalnızca seyir hâlinde işler.
+        const penalty = harshBrakePenalty(s.activeRouteId, s.currentSpeedKmh, kmh);
+        if (penalty === 0) return { currentSpeedKmh: kmh };
+        return {
+          currentSpeedKmh: kmh,
+          satisfaction: clampSatisfaction(s.satisfaction - penalty),
+          moodReason: "harshBrake" as const,
+          moodReasonLeft: MOOD_REASON_VISIBLE_SECONDS,
+        };
+      }),
 
     setDrivingInput: (input) =>
       set((s) => {

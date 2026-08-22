@@ -82,7 +82,8 @@ export function PassengerMoodBubble() {
     if (moodReason) pulse.current = 1;
   }, [moodReason]);
 
-  const mood = moodReason === "speeding" ? "angry" : moodForSatisfaction(satisfaction);
+  // Hiz da sert fren de ayni tepkiyi verir: arkadaki yolcu rahatsiz.
+  const mood = moodReason ? "angry" : moodForSatisfaction(satisfaction);
 
   useFrame((_, delta) => {
     if (!sprite.current) return;

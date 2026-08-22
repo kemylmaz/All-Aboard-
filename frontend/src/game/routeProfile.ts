@@ -79,3 +79,94 @@ export function advanceRouteMastery(
   const xp = current.xp + gained;
   return { ...mastery, [routeId]: { xp, level: masteryLevelForXp(xp) } };
 }
+
+// ---------------------------------------------------------------------------
+// Hat kuralları — her hattın kendi oynanış problemi
+//
+// Talep ve risk çarpanı iki hattı ayırmaya yetmiyordu: oyuncu ikisini de
+// hissetmiyor, yalnızca sayıları okuyordu. Aşağıdaki kurallar hattı sürerken
+// fark edilir: Üniversite sabah patlayıp gün ortası boşalır, Hastane sert fren
+// affetmez, Gece geç saatte iyi öder. Mahalle hattının kuralı yoktur — orada
+// oyuncu önce sürmeyi öğrenir.
+// Sayılar: shared/economy.json > routes
+// ---------------------------------------------------------------------------
+
+interface RouteRushRule {
+  startHour: number;
+  endHour: number;
+  peakMultiplier: number;
+  offPeakMultiplier: number;
+}
+
+interface RouteSmoothRideRule {
+  /** Bir saniyede bu kadar km/s düşüş sert fren sayılır. */
+  harshBrakeKmh: number;
+  harshBrakeSatisfactionPenalty: number;
+  speedingPenaltyMultiplier: number;
+}
+
+interface RouteNightRule {
+  startHour: number;
+  endHour: number;
+  fareMultiplier: number;
+}
+
+interface RouteRules {
+  rush?: RouteRushRule;
+  smoothRide?: RouteSmoothRideRule;
+  nightShift?: RouteNightRule;
+}
+
+export function getRouteRules(routeId: string): RouteRules {
+  return getRouteConfig(routeId) as RouteRules;
+}
+
+/** Hangi hattın kuralı var — gün başı ekranı bunu metne çevirir. */
+export function routeRuleId(routeId: string): "rush" | "smoothRide" | "nightShift" | null {
+  const rules = getRouteRules(routeId);
+  if (rules.rush) return "rush";
+  if (rules.smoothRide) return "smoothRide";
+  if (rules.nightShift) return "nightShift";
+  return null;
+}
+
+function hourOf(gameTimeMinutes: number): number {
+  return Math.floor(gameTimeMinutes / 60) % 24;
+}
+
+/** Gece yarısını geçen pencereler için (20:00–06:00 gibi). */
+function withinHours(hour: number, startHour: number, endHour: number): boolean {
+  return startHour <= endHour ? hour >= startHour && hour < endHour : hour >= startHour || hour < endHour;
+}
+
+/** Üniversite hattı: pik saatte kuyruk hızlı büyür, dışında yavaşlar. */
+export function routeDemandFactorAt(routeId: string, gameTimeMinutes: number): number {
+  const rush = getRouteRules(routeId).rush;
+  if (!rush) return 1;
+  return withinHours(hourOf(gameTimeMinutes), rush.startHour, rush.endHour)
+    ? rush.peakMultiplier
+    : rush.offPeakMultiplier;
+}
+
+/** Gece hattı: geç saatte ücret yüksek. */
+export function routeFareFactorAt(routeId: string, gameTimeMinutes: number): number {
+  const night = getRouteRules(routeId).nightShift;
+  if (!night) return 1;
+  return withinHours(hourOf(gameTimeMinutes), night.startHour, night.endHour) ? night.fareMultiplier : 1;
+}
+
+/** Hastane hattı: hız cezası ağırlaşır, sert fren ayrıca memnuniyet kırar. */
+export function routeSpeedingPenaltyMultiplier(routeId: string): number {
+  return getRouteRules(routeId).smoothRide?.speedingPenaltyMultiplier ?? 1;
+}
+
+/**
+ * Ani yavaşlama memnuniyet cezası. Kuralı olmayan hatta 0 döner; hızlanma ve
+ * durakta durma cezalandırılmaz — yalnızca seyir hâlindeki sert fren.
+ */
+export function harshBrakePenalty(routeId: string, previousKmh: number, nextKmh: number): number {
+  const rule = getRouteRules(routeId).smoothRide;
+  if (!rule) return 0;
+  const drop = previousKmh - nextKmh;
+  return drop >= rule.harshBrakeKmh && nextKmh > 5 ? rule.harshBrakeSatisfactionPenalty : 0;
+}
