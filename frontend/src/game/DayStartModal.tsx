@@ -12,6 +12,28 @@ import { streakFareMultiplier, useProfileStore } from "./profileStore";
 
 const GOALS: DayGoalId[] = ["earnings", "satisfaction", "safety"];
 
+/**
+ * Bir olayın manşette gösterilecek sayısal etkileri. Sıfır olan alan yazılmaz:
+ * "risk +%0" bilgi değil, gürültüdür. Talep ve ücretin artması oyuncunun
+ * lehine, riskin artması aleyhinedir — renk bunu ayırır.
+ */
+function headlineEffects(event: { demandDelta: number; riskDelta: number; fareDelta: number }) {
+  return (
+    [
+      { key: "demand", value: event.demandDelta, goodWhenUp: true },
+      { key: "fare", value: event.fareDelta, goodWhenUp: true },
+      { key: "risk", value: event.riskDelta, goodWhenUp: false },
+    ] as const
+  )
+    .filter((effect) => Math.round(effect.value * 100) !== 0)
+    .map((effect) => ({
+      key: effect.key,
+      percent: Math.abs(Math.round(effect.value * 100)),
+      sign: effect.value > 0 ? "+" : "−",
+      good: effect.value > 0 === effect.goodWhenUp,
+    }));
+}
+
 // Faz 3: Gün Başlat — hat + manuel/şoför + ana hedef seçimi, sonra vardiya başlar.
 export function DayStartModal() {
   const t = useT();
@@ -22,6 +44,7 @@ export function DayStartModal() {
   const hiredDriverId = useGameStore((s) => s.hiredDriverId);
   const routeMastery = useGameStore((s) => s.routeMastery);
   const cityEvent = useGameStore((s) => s.cityEvent);
+  const gameDay = useGameStore((s) => s.gameDay);
   const eventPrepared = useGameStore((s) => s.eventPrepared);
   const fetchCityEvent = useGameStore((s) => s.fetchCityEvent);
   const money = useGameStore((s) => s.money);
@@ -55,8 +78,65 @@ export function DayStartModal() {
   return (
     <div className="fixed inset-0 z-[105] grid place-items-center overflow-y-auto bg-black/45 p-4 backdrop-blur-sm ff-scroll" role="dialog" aria-modal="true" aria-label={t("day.startTitle")}>
       <div className="ff-panel-strong my-auto max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto p-5 ff-scroll">
-        <h2 className="ff-display text-xl">{t("day.previewTitle")}</h2>
-        <p className="mt-1 text-xs text-white/50">{t("day.startSubtitle")}</p>
+        {/* Günün manşeti: her gün önce ne olduğunu söyler, sonra seçim sorar.
+            Olay adı tek başına bir şey ifade etmiyordu — rozetler o olayın
+            bugünkü sayısal karşılığını gösterir, oyuncu hattını ona göre seçer. */}
+        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/40">
+          {t("day.headlineEyebrow", { day: gameDay })}
+        </p>
+        <h2 className="ff-display mt-1 text-2xl leading-tight">
+          {cityEvent ? t(`event.${cityEvent.primary.id}`) : t("day.headline.calm")}
+        </h2>
+        <p className="mt-1 text-xs text-white/50">
+          {cityEvent
+            ? t("event.affectedRoute", {
+                route: ROUTE_DEFINITIONS.find((r) => r.id === cityEvent.affectedRouteId)?.name ?? cityEvent.affectedRouteId,
+              })
+            : t("day.headline.calmNote")}
+        </p>
+
+        {cityEvent && (
+          <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+            <span className="rounded-md bg-white/10 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-white/70">
+              {t(`event.severity.${cityEvent.primary.severity}`)}
+            </span>
+            {headlineEffects(cityEvent.primary).map((effect) => (
+              <span
+                key={effect.key}
+                data-good={effect.good}
+                className="rounded-md px-2 py-1 text-[10px] font-black tabular-nums data-[good=true]:bg-emerald-400/15 data-[good=true]:text-emerald-200 data-[good=false]:bg-red-400/15 data-[good=false]:text-red-200"
+              >
+                {effect.sign}%{effect.percent} {t(`day.effect.${effect.key}`)}
+              </span>
+            ))}
+            {cityEvent.affectedRouteId === routeId && (
+              <span className="rounded-md bg-amber-400/15 px-2 py-1 text-[10px] font-black text-amber-200">
+                {t("event.affectsSelected")}
+              </span>
+            )}
+            {eventPrepared && (
+              <span className="rounded-md bg-emerald-400/15 px-2 py-1 text-[10px] font-black text-emerald-200">
+                {t("event.preparedBadge")}
+              </span>
+            )}
+          </div>
+        )}
+
+        {cityEvent?.secondary && (
+          <p className="mt-1.5 text-[11px] text-white/45">
+            + {t(`event.${cityEvent.secondary.id}`)} · {t(`event.severity.${cityEvent.secondary.severity}`)}
+          </p>
+        )}
+
+        {cityEvent && !eventPrepared && (
+          <button
+            onClick={() => dispatchGameAction("prepareForEvent")}
+            disabled={money < cityEvent.primary.counterCost + (cityEvent.secondary?.counterCost ?? 0)}
+            className="ff-button ff-button-primary mt-2.5 h-8 min-h-8 w-full text-xs disabled:opacity-40"
+          >
+            {t("event.prepareButton", { cost: cityEvent.primary.counterCost + (cityEvent.secondary?.counterCost ?? 0) })}
+          </button>
+        )}
 
         {/* Gunluk seri: kacirinca kaybedilen somut kazanc. Gun basi ekraninda
             gosterilir cunku oyuncunun "bugun oynadim" karari tam burada verilir. */}
@@ -104,33 +184,6 @@ export function DayStartModal() {
           </div>
         </div>
 
-        {/* Faz 7: bugünün şehir olayı — hazırlık sinyali başlamadan önce görünür. */}
-        {cityEvent && (
-          <div className="mt-4 rounded-lg border border-amber-400/30 bg-amber-400/10 p-2.5 text-[11px]">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-amber-200">
-                ⚠ {t(`event.${cityEvent.primary.id}`)} · {t(`event.severity.${cityEvent.primary.severity}`)}
-              </span>
-              {eventPrepared && <span className="text-emerald-300">{t("event.preparedBadge")}</span>}
-            </div>
-            <div className="mt-1 text-white/60">
-              {t("event.affectedRoute", { route: ROUTE_DEFINITIONS.find((r) => r.id === cityEvent.affectedRouteId)?.name ?? cityEvent.affectedRouteId })}
-              {cityEvent.affectedRouteId === routeId && <span className="ml-1 text-red-300">{t("event.affectsSelected")}</span>}
-            </div>
-            {cityEvent.secondary && (
-              <div className="mt-0.5 text-white/60">+ {t(`event.${cityEvent.secondary.id}`)} · {t(`event.severity.${cityEvent.secondary.severity}`)}</div>
-            )}
-            {!eventPrepared && (
-              <button
-                onClick={() => dispatchGameAction("prepareForEvent")}
-                disabled={money < cityEvent.primary.counterCost + (cityEvent.secondary?.counterCost ?? 0)}
-                className="ff-button ff-button-primary mt-2 h-8 min-h-8 w-full text-xs disabled:opacity-40"
-              >
-                {t("event.prepareButton", { cost: cityEvent.primary.counterCost + (cityEvent.secondary?.counterCost ?? 0) })}
-              </button>
-            )}
-          </div>
-        )}
 
         {/* Sürüş modu */}
         <div className="mt-4">
