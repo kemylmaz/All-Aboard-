@@ -187,22 +187,11 @@ public static class EconomyConstants
         }
 
         Require(ChanceGames.MinimumReserve >= 0, "chanceGames.minimumReserve negatif olamaz");
-        Require(ChanceGames.PerformanceBoostMaxRatio >= 0, "chanceGames.performanceBoostMaxRatio negatif olamaz");
         Require(ChanceGames.LargeWinThreshold > 0, "chanceGames.largeWinThreshold pozitif olmalı");
         // Bir oyunun kendi gunluk hakki, paylasilan gunluk butceyi asarsa ust siniri hic
         // ulasilamaz olur (olu konfigurasyon) — her oyun kendi maxPlaysPerDay'inde en azindan
         // butcenin altinda kalabilmeli.
         Require(ChanceGames.Wheel.MaxSpinsPerDay * ChanceGames.Wheel.Stake <= ChanceGames.DailyBudgetLimit, "chanceGames.wheel gunluk hakki butceyi asiyor");
-        Require(ChanceGames.Plate.MaxPlaysPerDay * ChanceGames.Plate.Stake <= ChanceGames.DailyBudgetLimit, "chanceGames.plate gunluk hakki butceyi asiyor");
-        Require(ChanceGames.Lottery.MaxTicketsPerDay * ChanceGames.Lottery.TicketCost <= ChanceGames.DailyBudgetLimit, "chanceGames.lottery gunluk hakki butceyi asiyor");
-        Require(ChanceGames.Envelope.MaxPlaysPerDay * ChanceGames.Envelope.Stake <= ChanceGames.DailyBudgetLimit, "chanceGames.envelope gunluk hakki butceyi asiyor");
-        Require(ChanceGames.Coupon.MaxPlaysPerDay * ChanceGames.Coupon.Stake <= ChanceGames.DailyBudgetLimit, "chanceGames.coupon gunluk hakki butceyi asiyor");
-        Require(ChanceGames.Tombala.MaxPlaysPerDay * ChanceGames.Tombala.Stake <= ChanceGames.DailyBudgetLimit, "chanceGames.tombala gunluk hakki butceyi asiyor");
-        var allowedRewardTypes = new HashSet<string> { "money", "maintenanceCoupon", "cosmetic", "eventPrep", "contractReroll" };
-        foreach (var outcome in ChanceGames.Coupon.Outcomes.Concat(ChanceGames.Tombala.Outcomes).Concat(ChanceGames.Envelope.Outcomes))
-        {
-            Require(allowedRewardTypes.Contains(outcome.RewardType), $"chance outcome '{outcome.Id}' bilinmeyen rewardType");
-        }
 
         Require(CityEvents.Templates.Count > 0, "cityEvents.templates boş olamaz");
         Require(CityEvents.Templates.Select(item => item.Id).Distinct().Count() == CityEvents.Templates.Count, "cityEvents.templates id'leri benzersiz olmalı");
@@ -476,14 +465,8 @@ public sealed record ChanceGamesConfig(
     decimal DailyBudgetLimit,
     int RecentResultLimit,
     decimal MinimumReserve,
-    decimal PerformanceBoostMaxRatio,
     decimal LargeWinThreshold,
-    WheelGameConfig Wheel,
-    PlateGameConfig Plate,
-    LotteryGameConfig Lottery,
-    MiniChanceGameConfig Envelope,
-    MiniChanceGameConfig Coupon,
-    MiniChanceGameConfig Tombala
+    WheelGameConfig Wheel
 );
 
 public sealed record WheelGameConfig(
@@ -500,40 +483,7 @@ public sealed record WheelSegmentConfig(
     string Tone
 );
 
-public sealed record PlateGameConfig(
-    decimal Stake,
-    decimal Multiplier,
-    int MaxPlaysPerDay
-);
 
-public sealed record LotteryGameConfig(
-    decimal TicketCost,
-    int MaxTicketsPerDay,
-    List<LotteryPrizeConfig> Prizes
-);
 
-public sealed record LotteryPrizeConfig(
-    string Id,
-    string Label,
-    decimal Amount,
-    decimal Weight,
-    string Tone
-);
 
-public sealed record MiniChanceGameConfig(
-    decimal Stake,
-    int MaxPlaysPerDay,
-    List<MiniChanceOutcomeConfig> Outcomes
-);
 
-public sealed record MiniChanceOutcomeConfig(
-    string Id,
-    string Label,
-    decimal Payout,
-    decimal Weight,
-    string Tone,
-    // Faz 9: para dışı ödüller ve olay-bağımlı kutular. Varsayılan "money" mevcut oyunları etkilemez.
-    string RewardType = "money",
-    string? CosmeticId = null,
-    bool EventOnly = false
-);

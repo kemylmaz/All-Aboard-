@@ -574,46 +574,11 @@ app.MapPost("/api/chance/wheel/spin/{playerId}", async (string playerId, SpinWhe
 })
 .WithName("SpinWheel");
 
-app.MapPost("/api/chance/plate/play/{playerId}", async (string playerId, PlayPlateRequest request, FullFilledDbContext db, ProgressionService service, HttpContext httpContext) =>
-{
-    var auth = await FindAuthorizedSave(playerId, db, httpContext);
-    if (auth.Result is not null) return auth.Result;
-    return await ChanceGameService.PlayPlateAsync(playerId, request, db, service);
-})
-.WithName("PlayPlate");
-
-app.MapPost("/api/chance/lottery/ticket/{playerId}", async (string playerId, BuyLotteryTicketRequest request, FullFilledDbContext db, ProgressionService service, HttpContext httpContext) =>
-{
-    var auth = await FindAuthorizedSave(playerId, db, httpContext);
-    if (auth.Result is not null) return auth.Result;
-    return await ChanceGameService.BuyLotteryTicketAsync(playerId, request, db, service);
-})
-.WithName("BuyLotteryTicket");
 
 
-app.MapPost("/api/chance/envelope/play/{playerId}", async (string playerId, PlayMiniChanceRequest request, FullFilledDbContext db, ProgressionService service, HttpContext httpContext) =>
-{
-    var auth = await FindAuthorizedSave(playerId, db, httpContext);
-    if (auth.Result is not null) return auth.Result;
-    return await ChanceGameService.PlayMiniAsync(playerId, request, "envelope", db, service);
-})
-.WithName("PlayEnvelope");
 
-app.MapPost("/api/chance/coupon/play/{playerId}", async (string playerId, PlayMiniChanceRequest request, FullFilledDbContext db, ProgressionService service, HttpContext httpContext) =>
-{
-    var auth = await FindAuthorizedSave(playerId, db, httpContext);
-    if (auth.Result is not null) return auth.Result;
-    return await ChanceGameService.PlayMiniAsync(playerId, request, "coupon", db, service);
-})
-.WithName("PlayCoupon");
 
-app.MapPost("/api/chance/tombala/play/{playerId}", async (string playerId, PlayMiniChanceRequest request, FullFilledDbContext db, ProgressionService service, HttpContext httpContext) =>
-{
-    var auth = await FindAuthorizedSave(playerId, db, httpContext);
-    if (auth.Result is not null) return auth.Result;
-    return await ChanceGameService.PlayMiniAsync(playerId, request, "tombala", db, service);
-})
-.WithName("PlayTombala");// ---- Aşama 5: link=şehir, misafir yolcu, korsan sefer ----
+// ---- Aşama 5: link=şehir, misafir yolcu, korsan sefer ----
 // bkz. docs/game-design/06-sosyal-link-sekme.md + ADR-003 (asenkron multiplayer).
 // Not: kullanıcı adı artık /api/auth/login'de hesap açılışında belirleniyor — ayrı bir
 // "claim" uç noktasına gerek kalmadı (şifresiz claim güvenlik açığıydı, kaldırıldı).
@@ -1124,7 +1089,7 @@ static decimal NetShiftIncomePerSecond(string busId, string shiftId, DriverConfi
     return Math.Max(0, netPerShift / shiftRealSeconds);
 }
 
-static ChanceGamesDto NewChanceGamesState(int day) => new(day, 0m, 0, 0, 0, 0, 0, 0, []);
+static ChanceGamesDto NewChanceGamesState(int day) => new(day, 0m, 0, []);
 
 static ChanceGamesDto ParseChanceGames(string? chanceGamesJson)
 {

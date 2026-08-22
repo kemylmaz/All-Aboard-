@@ -26,12 +26,7 @@ public record ChanceGameResultDto(
 public record ChanceGamesDto(
     int Day,
     decimal DailyLimitUsed,
-    int WheelSpinsToday,
-    int PlatePlaysToday,
-    int LotteryTicketsToday,
-    int EnvelopePlaysToday,
-    int CouponPlaysToday,
-    int TombalaPlaysToday,
+    int WheelSpinsToday,
     List<ChanceGameResultDto> RecentResults
 );
 

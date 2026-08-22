@@ -1,15 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import {
-  buyLotteryTicket,
-  playCoupon,
-  playEnvelope,
-  playPlate,
-  playTombala,
-  pushSave,
-  spinWheel,
-} from "./api";
+import { pushSave, spinWheel } from "./api";
 import { ECONOMY } from "./economy";
 import { CoinsIcon, DiceIcon, XIcon } from "./GameIcon";
 import { getPlayerId } from "./playerId";
@@ -66,27 +58,12 @@ function ChanceGamesContent() {
 
   const chanceConfig = ECONOMY.chanceGames;
   const wheel = chanceConfig.wheel;
-  const plate = chanceConfig.plate;
-  const lottery = chanceConfig.lottery;
-  const envelope = chanceConfig.envelope;
-  const coupon = chanceConfig.coupon;
-  const tombala = chanceConfig.tombala;
   const segments = wheel.segments as WeightedItem[];
   const dailyLimit = chanceConfig.dailyBudgetLimit as number;
   const remainingLimit = Math.max(0, dailyLimit - chanceGames.dailyLimitUsed);
 
   const wheelStake = wheel.stake as number;
   const wheelLeft = Math.max(0, (wheel.maxSpinsPerDay as number) - chanceGames.wheelSpinsToday);
-  const plateStake = plate.stake as number;
-  const plateLeft = Math.max(0, (plate.maxPlaysPerDay as number) - chanceGames.platePlaysToday);
-  const lotteryCost = lottery.ticketCost as number;
-  const lotteryLeft = Math.max(0, (lottery.maxTicketsPerDay as number) - chanceGames.lotteryTicketsToday);
-  const envelopeStake = envelope.stake as number;
-  const envelopeLeft = Math.max(0, (envelope.maxPlaysPerDay as number) - chanceGames.envelopePlaysToday);
-  const couponStake = coupon.stake as number;
-  const couponLeft = Math.max(0, (coupon.maxPlaysPerDay as number) - chanceGames.couponPlaysToday);
-  const tombalaStake = tombala.stake as number;
-  const tombalaLeft = Math.max(0, (tombala.maxPlaysPerDay as number) - chanceGames.tombalaPlaysToday);
 
   const conicGradient = useMemo(() => {
     const slice = 100 / segments.length;
@@ -171,12 +148,6 @@ function ChanceGamesContent() {
               </div>
               <GameButton disabled={!canPlay(isLeader, busyGame, money, remainingLimit, wheelStake, wheelLeft)} busy={busyGame === "wheel"} label={t("chance.spinWheel")} onClick={() => runGame("wheel", (playerId) => spinWheel(playerId, gameDay))} />
             </div>
-
-            <MiniCard title={t("chance.plate")} subtitle={t("chance.stakeRights", { stake: formatMoney(plateStake), count: plateLeft })} body="34 FF ???" actionLabel={t("chance.odd")} secondActionLabel={t("chance.even")} disabled={!canPlay(isLeader, busyGame, money, remainingLimit, plateStake, plateLeft)} busy={busyGame === "plate"} onAction={() => runGame("plate", (playerId) => playPlate(playerId, gameDay, "tek"))} onSecondAction={() => runGame("plate", (playerId) => playPlate(playerId, gameDay, "cift"))} />
-            <MiniCard title={t("chance.lottery")} subtitle={t("chance.ticketRights", { stake: formatMoney(lotteryCost), count: lotteryLeft })} body="5M jackpot" actionLabel={t("chance.buyTicket")} disabled={!canPlay(isLeader, busyGame, money, remainingLimit, lotteryCost, lotteryLeft)} busy={busyGame === "lottery"} onAction={() => runGame("lottery", (playerId) => buyLotteryTicket(playerId, gameDay))} />
-            <MiniCard title={t("chance.envelope")} subtitle={t("chance.stakeRights", { stake: formatMoney(envelopeStake), count: envelopeLeft })} body={t("chance.envelopeBody")} actionLabel={t("chance.chooseEnvelope")} disabled={!canPlay(isLeader, busyGame, money, remainingLimit, envelopeStake, envelopeLeft)} busy={busyGame === "envelope"} onAction={() => runGame("envelope", (playerId) => playEnvelope(playerId, gameDay))} />
-            <MiniCard title={t("chance.coupon")} subtitle={t("chance.stakeRights", { stake: formatMoney(couponStake), count: couponLeft })} body={t("chance.couponBody")} actionLabel={t("chance.makeCoupon")} disabled={!canPlay(isLeader, busyGame, money, remainingLimit, couponStake, couponLeft)} busy={busyGame === "coupon"} onAction={() => runGame("coupon", (playerId) => playCoupon(playerId, gameDay))} />
-            <MiniCard title={t("chance.tombala")} subtitle={t("chance.stakeRights", { stake: formatMoney(tombalaStake), count: tombalaLeft })} body={t("chance.tombalaBody")} actionLabel={t("chance.openCard")} disabled={!canPlay(isLeader, busyGame, money, remainingLimit, tombalaStake, tombalaLeft)} busy={busyGame === "tombala"} onAction={() => runGame("tombala", (playerId) => playTombala(playerId, gameDay))} />
 
             {!isLeader && <PanelNotice tone="amber" text={t("chance.spectator")} />}
             {error && <PanelNotice tone="red" text={error} />}

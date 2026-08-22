@@ -239,11 +239,6 @@ export interface ChanceGamesState {
   day: number;
   dailyLimitUsed: number;
   wheelSpinsToday: number;
-  platePlaysToday: number;
-  lotteryTicketsToday: number;
-  envelopePlaysToday: number;
-  couponPlaysToday: number;
-  tombalaPlaysToday: number;
   recentResults: ChanceGameResult[];
 }
 interface DecisionState {
@@ -973,11 +968,6 @@ const initialChanceGames: ChanceGamesState = {
   day: 1,
   dailyLimitUsed: 0,
   wheelSpinsToday: 0,
-  platePlaysToday: 0,
-  lotteryTicketsToday: 0,
-  envelopePlaysToday: 0,
-  couponPlaysToday: 0,
-  tombalaPlaysToday: 0,
   recentResults: [],
 };
 const BUS_COLORS = ECONOMY.extraBuses.colors as string[];
@@ -995,11 +985,6 @@ function normalizeChanceGames(chanceGames: ChanceGamesState | undefined, day: nu
     day,
     dailyLimitUsed: Math.max(0, chanceGames.dailyLimitUsed),
     wheelSpinsToday: Math.max(0, chanceGames.wheelSpinsToday),
-    platePlaysToday: Math.max(0, chanceGames.platePlaysToday ?? 0),
-    lotteryTicketsToday: Math.max(0, chanceGames.lotteryTicketsToday ?? 0),
-    envelopePlaysToday: Math.max(0, chanceGames.envelopePlaysToday ?? 0),
-    couponPlaysToday: Math.max(0, chanceGames.couponPlaysToday ?? 0),
-    tombalaPlaysToday: Math.max(0, chanceGames.tombalaPlaysToday ?? 0),
     recentResults: (chanceGames.recentResults ?? []).slice(0, recentResultLimit),
   };
 }

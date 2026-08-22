@@ -83,64 +83,6 @@ export async function spinWheel(playerId: string, gameDay: number): Promise<Spin
   return data;
 }
 
-export interface PlayPlateResponse extends SpinWheelResponse {
-  plateDigit: number;
-  correctChoice: "tek" | "cift";
-}
-
-export async function playPlate(
-  playerId: string,
-  gameDay: number,
-  guess: "tek" | "cift"
-): Promise<PlayPlateResponse> {
-  const res = await apiFetch(`${API_BASE_URL}/api/chance/plate/play/${playerId}`, {
-    method: "POST",
-    headers: jsonAuthHeaders(),
-    body: JSON.stringify({ gameDay, guess, clientRequestId: createClientRequestId() }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message ?? `Plaka oynanamadı: ${res.status}`);
-  return data;
-}
-
-export async function buyLotteryTicket(playerId: string, gameDay: number): Promise<SpinWheelResponse> {
-  const res = await apiFetch(`${API_BASE_URL}/api/chance/lottery/ticket/${playerId}`, {
-    method: "POST",
-    headers: jsonAuthHeaders(),
-    body: JSON.stringify({ gameDay, clientRequestId: createClientRequestId() }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message ?? `Piyango bileti alınamadı: ${res.status}`);
-  return data;
-}
-export async function playEnvelope(playerId: string, gameDay: number): Promise<SpinWheelResponse> {
-  return playMiniChance(playerId, gameDay, "envelope", "Zarf oynanamadı");
-}
-
-export async function playCoupon(playerId: string, gameDay: number): Promise<SpinWheelResponse> {
-  return playMiniChance(playerId, gameDay, "coupon", "Kupon oynanamadı");
-}
-
-export async function playTombala(playerId: string, gameDay: number): Promise<SpinWheelResponse> {
-  return playMiniChance(playerId, gameDay, "tombala", "Tombala oynanamadı");
-}
-
-async function playMiniChance(
-  playerId: string,
-  gameDay: number,
-  gameId: "envelope" | "coupon" | "tombala",
-  fallbackMessage: string
-): Promise<SpinWheelResponse> {
-  const res = await apiFetch(`${API_BASE_URL}/api/chance/${gameId}/play/${playerId}`, {
-    method: "POST",
-    headers: jsonAuthHeaders(),
-    body: JSON.stringify({ gameDay, clientRequestId: createClientRequestId() }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message ?? `${fallbackMessage}: ${res.status}`);
-  return data;
-}
-
 function createClientRequestId() {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID();

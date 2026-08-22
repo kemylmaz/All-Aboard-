@@ -21,8 +21,6 @@ public static class ChanceGameService
 
     private static readonly JsonSerializerOptions ResponseJsonOptions = new(JsonSerializerDefaults.Web);
 
-    private const int RecentContractRunSampleSize = 5;
-
     public static Task<IResult> SpinWheelAsync(string playerId, SpinWheelRequest request, FullFilledDbContext db, ProgressionService service) =>
         RunForPlayerAsync(playerId, "wheel", request.ClientRequestId, $"wheel:{request.GameDay}", db, async save =>
         {
@@ -51,171 +49,6 @@ public static class ChanceGameService
             var response = new SpinWheelResponse(save.Money, chanceGames, result);
             return Results.Ok(response);
         });
-
-    public static Task<IResult> PlayPlateAsync(string playerId, PlayPlateRequest request, FullFilledDbContext db, ProgressionService service) =>
-        RunForPlayerAsync(playerId, "plate", request.ClientRequestId, $"plate:{request.GameDay}:{request.Guess.Trim().ToLowerInvariant()}", db, async save =>
-        {
-            var config = EconomyConstants.ChanceGames;
-            var plate = config.Plate;
-            var chanceGames = NormalizeChanceGames(ParseChanceGames(save.ChanceGamesJson), request.GameDay);
-            var guess = request.Guess.Trim().ToLowerInvariant();
-
-            if (guess is not ("tek" or "cift"))
-            {
-                return Results.BadRequest(new { message = "Plaka tahmini tek veya cift olmali." });
-            }
-
-            var limitError = await ValidatePlayAsync(playerId, save.Money, chanceGames, plate.Stake, chanceGames.PlatePlaysToday, plate.MaxPlaysPerDay, config, service, db, "Bugun plaka tahmini hakkin doldu.", $"Plaka oyunu icin en az {plate.Stake:N0} TL lazim.");
-            if (limitError is not null) return limitError;
-
-            var digit = RandomNumberGenerator.GetInt32(0, 10);
-            var correctChoice = digit % 2 == 0 ? "cift" : "tek";
-            var won = guess == correctChoice;
-            var payout = won ? Math.Round(plate.Stake * plate.Multiplier, 2) : 0m;
-            var net = payout - plate.Stake;
-            save.Money = Math.Max(0, save.Money + net);
-
-            var label = won ? $"Plaka {digit}: bildin" : $"Plaka {digit}: kaybettin";
-            var result = NewResult("plate", label, plate.Stake, payout, net, won ? plate.Multiplier : 0, won ? "green" : "red");
-            chanceGames = AddChanceResult(chanceGames with
-            {
-                DailyLimitUsed = chanceGames.DailyLimitUsed + plate.Stake,
-                PlatePlaysToday = chanceGames.PlatePlaysToday + 1,
-            }, result, config.RecentResultLimit);
-
-            save.ChanceGamesJson = JsonSerializer.Serialize(chanceGames);
-            save.SavedAtUtc = DateTime.UtcNow;
-            await LogLargeWinIfNeededAsync(db, playerId, result, save.Money, config);
-            return Results.Ok(new PlayPlateResponse(save.Money, chanceGames, result, digit, correctChoice));
-        });
-
-    public static Task<IResult> BuyLotteryTicketAsync(string playerId, BuyLotteryTicketRequest request, FullFilledDbContext db, ProgressionService service) =>
-        RunForPlayerAsync(playerId, "lottery", request.ClientRequestId, $"lottery:{request.GameDay}", db, async save =>
-        {
-            var config = EconomyConstants.ChanceGames;
-            var lottery = config.Lottery;
-            var chanceGames = NormalizeChanceGames(ParseChanceGames(save.ChanceGamesJson), request.GameDay);
-
-            var limitError = await ValidatePlayAsync(playerId, save.Money, chanceGames, lottery.TicketCost, chanceGames.LotteryTicketsToday, lottery.MaxTicketsPerDay, config, service, db, "Bugun piyango bileti hakkin doldu.", $"Piyango bileti icin en az {lottery.TicketCost:N0} TL lazim.");
-            if (limitError is not null) return limitError;
-
-            var prize = PickWeighted(lottery.Prizes, p => p.Weight);
-            var payout = prize.Amount;
-            var net = payout - lottery.TicketCost;
-            save.Money = Math.Max(0, save.Money + net);
-
-            var multiplier = lottery.TicketCost > 0 ? Math.Round(payout / lottery.TicketCost, 2) : 0;
-            var result = NewResult("lottery", prize.Label, lottery.TicketCost, payout, net, multiplier, prize.Tone);
-            chanceGames = AddChanceResult(chanceGames with
-            {
-                DailyLimitUsed = chanceGames.DailyLimitUsed + lottery.TicketCost,
-                LotteryTicketsToday = chanceGames.LotteryTicketsToday + 1,
-            }, result, config.RecentResultLimit);
-
-            save.ChanceGamesJson = JsonSerializer.Serialize(chanceGames);
-            save.SavedAtUtc = DateTime.UtcNow;
-            await LogLargeWinIfNeededAsync(db, playerId, result, save.Money, config);
-            return Results.Ok(new BuyLotteryTicketResponse(save.Money, chanceGames, result));
-        });
-
-    public static Task<IResult> PlayMiniAsync(string playerId, PlayMiniChanceRequest request, string gameId, FullFilledDbContext db, ProgressionService service) =>
-        RunForPlayerAsync(playerId, gameId, request.ClientRequestId, $"{gameId}:{request.GameDay}", db, async save =>
-        {
-            var config = EconomyConstants.ChanceGames;
-            var chanceGames = NormalizeChanceGames(ParseChanceGames(save.ChanceGamesJson), request.GameDay);
-            var game = gameId switch
-            {
-                "envelope" => (Config: config.Envelope, PlaysToday: chanceGames.EnvelopePlaysToday, MaxReachedMessage: "Bugun zarf hakkin doldu."),
-                "coupon" => (Config: config.Coupon, PlaysToday: chanceGames.CouponPlaysToday, MaxReachedMessage: "Bugun kupon hakkin doldu."),
-                "tombala" => (Config: config.Tombala, PlaysToday: chanceGames.TombalaPlaysToday, MaxReachedMessage: "Bugun tombala hakkin doldu."),
-                _ => throw new InvalidOperationException($"Unknown mini chance game: {gameId}"),
-            };
-
-            var limitError = await ValidatePlayAsync(playerId, save.Money, chanceGames, game.Config.Stake, game.PlaysToday, game.Config.MaxPlaysPerDay, config, service, db, game.MaxReachedMessage, $"Oynamak icin en az {game.Config.Stake:N0} TL lazim.");
-            if (limitError is not null) return limitError;
-
-            // Faz 9: kupon gerçek gün/kontrat performansına, tombala bugünün gerçek şehir
-            // olayına bağlanır. İkisi de yalnızca oyunun oynanabilirlik havuzunu/ağırlıklarını
-            // etkiler — hiçbiri XP, level veya mastery vermez.
-            var outcomes = game.Config.Outcomes;
-            var eventBoxLabel = (string?)null;
-            if (gameId == "coupon")
-            {
-                var performanceFactor = await ComputePerformanceFactorAsync(db, playerId);
-                outcomes = ApplyPerformanceBoost(outcomes, performanceFactor, config.PerformanceBoostMaxRatio);
-            }
-            else if (gameId == "tombala")
-            {
-                // Faz 9: kutu, bugünün GERÇEK şehir olayıyla dolar — Faz 7'nin aynı
-                // deterministik üretecinden (aynı gün her zaman aynı olay).
-                var progression = await service.EnsureAsync(playerId);
-                var (primaryEvent, _, _) = EconomyConstants.GenerateDailyEvent(playerId, request.GameDay, progression.Level);
-                var severityWeight = primaryEvent.Severity switch { "high" => 1.6m, "low" => 0.6m, _ => 1m };
-                eventBoxLabel = $"{primaryEvent.Id} kutusu";
-                outcomes = outcomes.Select(o => o.EventOnly ? o with { Weight = o.Weight * severityWeight } : o).ToList();
-            }
-
-            var outcome = PickWeighted(outcomes, o => o.Weight);
-            var payout = outcome.Payout;
-            var net = payout - game.Config.Stake;
-            save.Money = Math.Max(0, save.Money + net);
-
-            var multiplier = game.Config.Stake > 0 ? Math.Round(payout / game.Config.Stake, 2) : 0;
-            var label = outcome.EventOnly && eventBoxLabel is not null ? eventBoxLabel : outcome.Label;
-            var result = NewResult(gameId, label, game.Config.Stake, payout, net, multiplier, outcome.Tone, outcome.RewardType, outcome.CosmeticId);
-
-            chanceGames = gameId switch
-            {
-                "envelope" => chanceGames with { DailyLimitUsed = chanceGames.DailyLimitUsed + game.Config.Stake, EnvelopePlaysToday = chanceGames.EnvelopePlaysToday + 1 },
-                "coupon" => chanceGames with { DailyLimitUsed = chanceGames.DailyLimitUsed + game.Config.Stake, CouponPlaysToday = chanceGames.CouponPlaysToday + 1 },
-                "tombala" => chanceGames with { DailyLimitUsed = chanceGames.DailyLimitUsed + game.Config.Stake, TombalaPlaysToday = chanceGames.TombalaPlaysToday + 1 },
-                _ => chanceGames,
-            };
-            chanceGames = AddChanceResult(chanceGames, result, config.RecentResultLimit);
-
-            save.ChanceGamesJson = JsonSerializer.Serialize(chanceGames);
-            save.SavedAtUtc = DateTime.UtcNow;
-            await LogLargeWinIfNeededAsync(db, playerId, result, save.Money, config);
-            return Results.Ok(new PlayMiniChanceResponse(save.Money, chanceGames, result));
-        });
-
-    /// Son vardiya notu (ShiftResults) + son kontrat sonuçları (ContractRuns) ortalamasından
-    /// 0-1 performans skoru. Geçmiş yoksa nötr (0.5) — ne ceza ne bonus.
-    private static async Task<decimal> ComputePerformanceFactorAsync(FullFilledDbContext db, string playerId)
-    {
-        var lastShift = await db.ShiftResults
-            .AsNoTracking()
-            .Where(s => s.PlayerId == playerId)
-            .OrderByDescending(s => s.CompletedAtUtc)
-            .FirstOrDefaultAsync();
-        var shiftFactor = lastShift is null ? 0.5m : Math.Clamp(lastShift.Score / 100m, 0m, 1m);
-
-        var recentRuns = await db.ContractRuns
-            .AsNoTracking()
-            .Where(c => c.PlayerId == playerId && c.Status != "active")
-            .OrderByDescending(c => c.CompletedAtUtc)
-            .Take(RecentContractRunSampleSize)
-            .ToListAsync();
-        var contractFactor = recentRuns.Count == 0
-            ? 0.5m
-            : (decimal)recentRuns.Count(c => c.Status == "completed") / recentRuns.Count;
-
-        return (shiftFactor + contractFactor) / 2m;
-    }
-
-    /// İyi performans "miss/none" ağırlığını düşürür, olumlu sonuçların ağırlığını yükseltir.
-    /// Para-dışı ödüllere dokunmaz — onlar sabit oranda kalır (kısayol değildir).
-    private static List<MiniChanceOutcomeConfig> ApplyPerformanceBoost(IReadOnlyList<MiniChanceOutcomeConfig> outcomes, decimal performanceFactor, decimal maxBoostRatio)
-    {
-        var boost = performanceFactor * maxBoostRatio;
-        return outcomes.Select(o =>
-        {
-            if (o.RewardType != "money") return o;
-            var isMiss = o.Payout <= 0;
-            var scale = isMiss ? Math.Max(0.1m, 1 - boost) : 1 + boost;
-            return o with { Weight = o.Weight * scale };
-        }).ToList();
-    }
 
     private static async Task LogLargeWinIfNeededAsync(FullFilledDbContext db, string playerId, ChanceGameResultDto result, decimal balanceAfter, ChanceGamesConfig config)
     {
@@ -344,7 +177,7 @@ public static class ChanceGameService
     private static ChanceGameResultDto NewResult(string gameId, string label, decimal stake, decimal payout, decimal net, decimal multiplier, string tone, string rewardType = "money", string? cosmeticId = null) =>
         new(Guid.NewGuid().ToString("N"), gameId, label, stake, payout, net, multiplier, tone, DateTime.UtcNow, rewardType, cosmeticId);
 
-    private static ChanceGamesDto NewChanceGamesState(int day) => new(day, 0m, 0, 0, 0, 0, 0, 0, []);
+    private static ChanceGamesDto NewChanceGamesState(int day) => new(day, 0m, 0, []);
 
     private static ChanceGamesDto ParseChanceGames(string? chanceGamesJson)
     {
@@ -366,11 +199,6 @@ public static class ChanceGameService
         {
             DailyLimitUsed = Math.Max(0, chanceGames.DailyLimitUsed),
             WheelSpinsToday = Math.Max(0, chanceGames.WheelSpinsToday),
-            PlatePlaysToday = Math.Max(0, chanceGames.PlatePlaysToday),
-            LotteryTicketsToday = Math.Max(0, chanceGames.LotteryTicketsToday),
-            EnvelopePlaysToday = Math.Max(0, chanceGames.EnvelopePlaysToday),
-            CouponPlaysToday = Math.Max(0, chanceGames.CouponPlaysToday),
-            TombalaPlaysToday = Math.Max(0, chanceGames.TombalaPlaysToday),
             RecentResults = chanceGames.RecentResults ?? [],
         };
     }
