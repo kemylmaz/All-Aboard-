@@ -947,18 +947,10 @@ function routePathSummary(routeId: string) {
       return "Meydan kuzey ici serit -> dogu inis -> meydan guney serit -> bati cikis.";
     case "main-city":
       return "Merkez meydan -> dogu sokaklari -> guney aks -> bati mahalle -> kuzey donus.";
-    case "west-worker":
-      return "Meydan guney -> bati sanayi akslari -> kuzey-bati donus -> merkez baglanti.";
     case "premium-outer":
       return "Dogu hat -> kuzey baglanti -> dis ring -> bati donus -> guney merkez.";
     case "north-loop":
       return "Kuzey bloklar arasi kisa halka; sik durak, dusuk acilis bedeli.";
-    case "east-express":
-      return "Dogu bulvarinda uzun duz parkur; az durak, yuksek hiz.";
-    case "south-coast":
-      return "Guney sahil aksi; bahsisi yuksek yolcu profili.";
-    case "grand-ring":
-      return "Sehrin en dis halkasi; en uzun parkur ve en zengin yolcu.";
     default:
       return "Secili hat yolu haritada cyan serit ile gosterilir.";
   }

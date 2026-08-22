@@ -275,11 +275,7 @@ public static class EconomyConstants
         ["starter-center"] = 0m,
         ["main-city"] = 25000m,
         ["north-loop"] = 60000m,
-        ["west-worker"] = 110000m,
-        ["east-express"] = 180000m,
-        ["south-coast"] = 280000m,
         ["premium-outer"] = 400000m,
-        ["grand-ring"] = 650000m,
     };
 
     /// Frontend content/busCatalog.ts ile senkron tutulmali (id + price).

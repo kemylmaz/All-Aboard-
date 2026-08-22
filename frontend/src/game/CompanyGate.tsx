@@ -8,15 +8,13 @@ import { getPlayerId } from "./playerId";
 import { useProgressionStore } from "./progressionStore";
 import { LocaleHydrator, t as translateStatic, useLocaleStore, useT } from "./i18n";
 
-import { ECONOMY } from "./economy";
 import { CompanyEmblem } from "./CompanyEmblem";
 import { StarterBusShowroom } from "./StarterBusShowroom";
 
 const EMBLEMS = ["route", "wheel", "city", "star"] as const;
-const STRATEGIES = ["service", "operations", "growth"] as const;
 const STARTER_BUSES = ["hurda-mavi", "hurda-sari", "hurda-yesil"] as const;
 const COLORS = ["#153448", "#2f5d50", "#674747", "#504b68", "#d1a054", "#f4ead5"];
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 3;
 
 /**
  * Sirket kurulum sihirbazi. Giris ekraniyla AYNI kabuk: `.ff-auth-screen` bulanik
@@ -264,41 +262,8 @@ export function CompanyGate({ children }: { children: React.ReactNode }) {
               </div>
             )}
 
-            {step === 2 && (
-              /* Her yaklaşımın sayısal etkisi rozet olarak ayrıca gösterilir —
-                 oyuncu "ne kazanıyorum" sorusunun cevabını okumadan da görsün. */
-              <div className="space-y-2">
-                {STRATEGIES.map((value) => {
-                  const effect = ECONOMY.progression.strategies[value];
-                  const badge =
-                    value === "service"
-                      ? `+%${Math.round((effect.satisfactionGainMultiplier - 1) * 100)} ${t("company.effect.satisfaction")}`
-                      : value === "operations"
-                        ? `−%${Math.round((1 - effect.policeRiskMultiplier) * 100)} ${t("company.effect.risk")}`
-                        : `+%${Math.round((effect.fleetIncomeMultiplier - 1) * 100)} ${t("company.effect.fleet")}`;
-                  return (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => setForm({ ...form, strategy: value })}
-                      data-active={form.strategy === value}
-                      className="ff-day-option ff-strategy-option w-full px-3.5 py-3 text-left"
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <strong className="ff-display block text-sm">{t(`company.strategy.${value}`)}</strong>
-                        <span className="ff-strategy-badge">{badge}</span>
-                      </div>
-                      <span className="mt-1 block text-[11px] leading-4 font-semibold">
-                        {t(`company.strategy.${value}.desc`)}
-                      </span>
-                    </button>
-                  );
-                })}
-                <p className="text-[11px] leading-4 text-ff-muted">{t("company.strategyNote")}</p>
-              </div>
-            )}
 
-            {step === 3 && (
+            {step === 2 && (
               <div className="space-y-3">
                 {/* Showroom: seçili minibüs döner tablada canlı 3B olarak sergilenir. */}
                 <StarterBusShowroom busId={form.starterBusId} />

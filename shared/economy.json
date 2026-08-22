@@ -100,29 +100,6 @@
       ]
     },
     {
-      "id": "turgut",
-      "name": "Turgut",
-      "nickname": "Tribün",
-      "speedMultiplier": 1.2,
-      "efficiency": 0.67,
-      "salaryShare": 0.2,
-      "hireCost": 2700,
-      "portraitPath": "/drivers/sofor-04.png",
-      "dailySalary": 520,
-      "punctuality": 0.5,
-      "service": 0.85,
-      "reliability": 0.55,
-      "coolness": 0.6,
-      "personality": "sosyal",
-      "strongTags": [
-        "event",
-        "express"
-      ],
-      "weakTags": [
-        "hospital"
-      ]
-    },
-    {
       "id": "naciye",
       "name": "Naciye",
       "nickname": "Hanım Şoför",
@@ -169,121 +146,6 @@
       ]
     },
     {
-      "id": "deniz",
-      "name": "Deniz",
-      "nickname": "Yeni Nesil",
-      "speedMultiplier": 1.15,
-      "efficiency": 0.76,
-      "salaryShare": 0.16,
-      "hireCost": 3400,
-      "portraitPath": "/drivers/sofor-07.png",
-      "dailySalary": 410,
-      "punctuality": 0.6,
-      "service": 0.75,
-      "reliability": 0.55,
-      "coolness": 0.55,
-      "personality": "enerjik",
-      "strongTags": [
-        "express",
-        "event"
-      ],
-      "weakTags": [
-        "night"
-      ]
-    },
-    {
-      "id": "hasan",
-      "name": "Hasan",
-      "nickname": "Fırtına",
-      "speedMultiplier": 1.35,
-      "efficiency": 0.58,
-      "salaryShare": 0.22,
-      "hireCost": 2300,
-      "portraitPath": "/drivers/sofor-08.png",
-      "dailySalary": 540,
-      "punctuality": 0.45,
-      "service": 0.35,
-      "reliability": 0.3,
-      "coolness": 0.25,
-      "personality": "cesur",
-      "strongTags": [
-        "express",
-        "event"
-      ],
-      "weakTags": [
-        "hospital"
-      ]
-    },
-    {
-      "id": "fatma",
-      "name": "Fatma",
-      "nickname": "Tedbirli",
-      "speedMultiplier": 0.85,
-      "efficiency": 0.96,
-      "salaryShare": 0.08,
-      "hireCost": 5400,
-      "portraitPath": "/drivers/sofor-09.png",
-      "dailySalary": 340,
-      "punctuality": 0.92,
-      "service": 0.9,
-      "reliability": 0.95,
-      "coolness": 0.88,
-      "personality": "tedbirli",
-      "strongTags": [
-        "hospital",
-        "school"
-      ],
-      "weakTags": [
-        "express"
-      ]
-    },
-    {
-      "id": "ibrahim",
-      "name": "İbrahim",
-      "nickname": "Orta Yol",
-      "speedMultiplier": 1,
-      "efficiency": 0.78,
-      "salaryShare": 0.14,
-      "hireCost": 3200,
-      "portraitPath": "/drivers/sofor-10.png",
-      "dailySalary": 380,
-      "punctuality": 0.65,
-      "service": 0.65,
-      "reliability": 0.65,
-      "coolness": 0.65,
-      "personality": "dengeli",
-      "strongTags": [
-        "school",
-        "industrial"
-      ],
-      "weakTags": [
-        "event"
-      ]
-    },
-    {
-      "id": "nazmi",
-      "name": "Nazmi",
-      "nickname": "Gazcı",
-      "speedMultiplier": 1.25,
-      "efficiency": 0.62,
-      "salaryShare": 0.2,
-      "hireCost": 2500,
-      "portraitPath": "/drivers/sofor-11.png",
-      "dailySalary": 500,
-      "punctuality": 0.5,
-      "service": 0.4,
-      "reliability": 0.4,
-      "coolness": 0.3,
-      "personality": "hizli",
-      "strongTags": [
-        "express",
-        "night"
-      ],
-      "weakTags": [
-        "hospital"
-      ]
-    },
-    {
       "id": "ayse",
       "name": "Ayşe",
       "nickname": "Tez Canlı",
@@ -304,52 +166,6 @@
       ],
       "weakTags": [
         "night"
-      ]
-    },
-    {
-      "id": "selim",
-      "name": "Selim",
-      "nickname": "Usta",
-      "speedMultiplier": 1.05,
-      "efficiency": 0.9,
-      "salaryShare": 0.12,
-      "hireCost": 4700,
-      "portraitPath": "/drivers/sofor-13.png",
-      "dailySalary": 420,
-      "punctuality": 0.78,
-      "service": 0.75,
-      "reliability": 0.85,
-      "coolness": 0.82,
-      "personality": "usta",
-      "strongTags": [
-        "industrial",
-        "night"
-      ],
-      "weakTags": [
-        "event"
-      ]
-    },
-    {
-      "id": "emine",
-      "name": "Emine",
-      "nickname": "Dakik",
-      "speedMultiplier": 0.98,
-      "efficiency": 0.97,
-      "salaryShare": 0.09,
-      "hireCost": 5800,
-      "portraitPath": "/drivers/sofor-14.png",
-      "dailySalary": 410,
-      "punctuality": 0.95,
-      "service": 0.82,
-      "reliability": 0.9,
-      "coolness": 0.78,
-      "personality": "dakik",
-      "strongTags": [
-        "hospital",
-        "school"
-      ],
-      "weakTags": [
-        "express"
       ]
     },
     {
@@ -598,12 +414,6 @@
       "riskMultiplier": 0.95,
       "recommendedTrait": "punctuality"
     },
-    "west-worker": {
-      "profile": "worker",
-      "demandMultiplier": 1.1,
-      "riskMultiplier": 1.05,
-      "recommendedTrait": "reliability"
-    },
     "premium-outer": {
       "profile": "patient",
       "demandMultiplier": 0.95,
@@ -615,24 +425,6 @@
       "demandMultiplier": 0.85,
       "riskMultiplier": 1.3,
       "recommendedTrait": "coolness"
-    },
-    "east-express": {
-      "profile": "commuter",
-      "demandMultiplier": 1.05,
-      "riskMultiplier": 1.25,
-      "recommendedTrait": "speed"
-    },
-    "south-coast": {
-      "profile": "tourist",
-      "demandMultiplier": 1.2,
-      "riskMultiplier": 0.9,
-      "recommendedTrait": "economy"
-    },
-    "grand-ring": {
-      "profile": "mixed",
-      "demandMultiplier": 1,
-      "riskMultiplier": 1.1,
-      "recommendedTrait": "economy"
     }
   },
   "routeMastery": {

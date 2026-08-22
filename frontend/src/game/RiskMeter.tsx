@@ -45,12 +45,18 @@ export function RiskMeter() {
         />
       </div>
 
-      <div className="ff-risk-licence">
-        <span>{t("risk.licence")}</span>
-        <span className="tabular-nums" data-warn={licencePoints >= maxPoints * 0.6}>
-          {Math.round(licencePoints)}/{maxPoints}
-        </span>
-      </div>
+      {/* Ehliyet puanı yalnızca gerçekten puan yendiğinde görünür. İki sayı aynı
+          ihlalleri sayıyordu: risk anlık baskı, puan onun kalıcı izi. Ortada iz
+          yokken ekranda durması, oyuncuya izlemesi gereken ikinci bir ölçü
+          olduğunu düşündürüyordu. */}
+      {licencePoints > 0 && (
+        <div className="ff-risk-licence">
+          <span>{t("risk.licence")}</span>
+          <span className="tabular-nums" data-warn={licencePoints >= maxPoints * 0.6}>
+            {Math.round(licencePoints)}/{maxPoints}
+          </span>
+        </div>
+      )}
 
       {lockLeft > 0 && (
         <div className="ff-risk-lock">{t("risk.locked", { seconds: Math.ceil(lockLeft) })}</div>
