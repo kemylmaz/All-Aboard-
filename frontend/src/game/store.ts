@@ -1,4 +1,5 @@
 ﻿import { create } from "zustand";
+import { applyRivalDay, rivalDemandFactor, type RivalState } from "./rival";
 import { ECONOMY } from "./economy";
 import {
   DEFAULT_ROUTE_ID,
@@ -102,6 +103,9 @@ export interface DayReportData {
   netEarned: number;
   /** Giderler düşüldükten sonra kasaya kalan. Eksi olabilir. */
   upkeep: UpkeepBreakdown;
+  /** Bugun surulen hatta rakip bir durak aldi mi, geri mi verdi. */
+  rivalLostStop: boolean;
+  rivalRecoveredStop: boolean;
   gameDay: number;
   goalId: DayGoalId;
   /** Günün hedefi tutturuldu mu? Tutunca net kazancın bir oranı prim olarak ödenir. */
@@ -414,6 +418,7 @@ export interface GameSnapshot {
   driverShiftMinutes?: Record<string, number>;
   driverMorale?: Record<string, number>;
   routeMastery?: Record<string, RouteMasteryEntry>;
+  rival?: RivalState;
   /** Faz 8: paket bazlı tutorial tamamlanma/atlama durumu. */
   tutorialStatus?: Record<string, string>;
   chanceGames?: ChanceGamesState;
@@ -455,6 +460,7 @@ export interface BroadcastPayload {
   driverMorale: Record<string, number>;
   /** Faz 6: hat basina mastery seviye/XP. Gun sonu notuyla artar, sunucuda kalicidir. */
   routeMastery: Record<string, RouteMasteryEntry>;
+  rival: RivalState;
   /** Faz 7: bugunun sehir olayi (sunucu uretir) + oyuncu "hazirlik" secimi. */
   cityEvent: DailyEvent | null;
   eventPrepared: boolean;
@@ -516,6 +522,7 @@ interface GameState {
   driverMorale: Record<string, number>;
   /** Faz 6: hat basina mastery seviye/XP. Sunucuda kalicidir. */
   routeMastery: Record<string, RouteMasteryEntry>;
+  rival: RivalState;
   /** Faz 7: bugunun sehir olayi + hazirlik secimi. Yeni gunde sunucudan yeniden cekilir. */
   cityEvent: DailyEvent | null;
   eventPrepared: boolean;
@@ -1379,6 +1386,7 @@ export const useGameStore = create<GameState>((set, get) => {
     driverShiftMinutes: {},
     driverMorale: {},
     routeMastery: {},
+    rival: {},
     cityEvent: null,
     eventPrepared: false,
     freeEventPrepCredits: 0,
@@ -1489,6 +1497,7 @@ export const useGameStore = create<GameState>((set, get) => {
         driverShiftMinutes: s.driverShiftMinutes,
         driverMorale: s.driverMorale,
         routeMastery: s.routeMastery,
+        rival: s.rival,
         cityEvent: s.cityEvent,
         eventPrepared: s.eventPrepared,
         busProgress: s.busProgress,
@@ -1546,7 +1555,9 @@ export const useGameStore = create<GameState>((set, get) => {
         // gün ortasında yarıya iner (bkz. routeProfile > routeDemandFactorAt).
         const routeDemand =
           getRouteConfig(s.activeRouteId).demandMultiplier *
-          routeDemandFactorAt(s.activeRouteId, s.gameTimeMinutes);
+          routeDemandFactorAt(s.activeRouteId, s.gameTimeMinutes) *
+          // Rakibin aldigi her durak bu hattin talebini dusurur.
+          rivalDemandFactor(s.rival, s.activeRouteId);
         // Faz 7: bugünün şehir olayı, sürülen hatta ise talep/memnuniyeti de değiştirir.
         const eventEffects = activeEventEffects(s);
         const demandFactor = (min + (max - min) * (s.satisfaction / 100)) * terminalDemand * routeDemand * eventEffects.demandMultiplier;
@@ -2451,6 +2462,9 @@ export const useGameStore = create<GameState>((set, get) => {
       ];
       const upkeep = computeDayUpkeep(s.ownedBuses.length, hiredDriverIds, run.startedAtGameDay);
 
+      // Rakip firma: ihmal edilen hatta duraklar el degistirir, iyi gun geri kazandirir.
+      const rivalOutcome = applyRivalDay(s.rival, s.unlockedRouteIds, run.routeId, s.satisfaction);
+
       set({
         money: Math.max(0, s.money + goalBonus - upkeep.total),
         dayRun: null,
@@ -2458,6 +2472,7 @@ export const useGameStore = create<GameState>((set, get) => {
         lapReport: null,
         driverMorale,
         routeMastery,
+        rival: rivalOutcome.rival,
         dayReport: {
           grade: result.grade,
           score: result.score,
@@ -2465,6 +2480,8 @@ export const useGameStore = create<GameState>((set, get) => {
           breakdown: result.breakdown,
           netEarned: Math.round(run.netEarned),
           upkeep,
+          rivalLostStop: rivalOutcome.lostStopOnDrivenRoute,
+          rivalRecoveredStop: rivalOutcome.recoveredStopOnDrivenRoute,
           gameDay: run.startedAtGameDay,
           goalId: run.goalId,
           goalMet,
@@ -2983,6 +3000,7 @@ export const useGameStore = create<GameState>((set, get) => {
         driverShiftMinutes: s.driverShiftMinutes,
         driverMorale: s.driverMorale,
         routeMastery: s.routeMastery,
+        rival: s.rival,
         tutorialStatus: useTutorialStore.getState().packageStatus,
         chanceGames: normalizeChanceGames(s.chanceGames, s.gameDay),
         servicePlan: s.servicePlan,

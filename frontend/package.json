@@ -17,7 +17,8 @@
     "predev": "node scripts/sync-shared.mjs",
     "prebuild": "node scripts/sync-shared.mjs",
     "check:routes": "node scripts/check-route-rules.mjs",
-    "check:upkeep": "node scripts/check-upkeep.mjs"
+    "check:upkeep": "node scripts/check-upkeep.mjs",
+    "check:rival": "node scripts/check-rival.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",

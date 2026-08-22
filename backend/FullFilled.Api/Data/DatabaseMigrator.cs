@@ -18,6 +18,7 @@ public static class DatabaseMigrator
         new(7, "phase-eight-tutorial-status", ApplyPhaseEightTutorialStatusAsync),
         new(8, "social-friendships", ApplySocialFriendshipsAsync),
         new(9, "licence-state-persistence", ApplyLicenceStatePersistenceAsync),
+        new(10, "rival-pressure", ApplyRivalPressureAsync),
     ];
 
     public static async Task MigrateAsync(FullFilledDbContext db, CancellationToken cancellationToken = default)
@@ -199,6 +200,13 @@ public static class DatabaseMigrator
         // Ayni ikili iki kez eklenemez; liste okumasi da PlayerId uzerinden filtreledigi icin ayrica indekslenir.
         "CREATE UNIQUE INDEX IF NOT EXISTS IX_Friendships_PlayerId_FriendPlayerId ON Friendships (PlayerId, FriendPlayerId)",
         "CREATE INDEX IF NOT EXISTS IX_Friendships_PlayerId ON Friendships (PlayerId)");
+    /// Rakip firmanin hat basina baskisi: ihmal puani ve kaybedilen durak sayisi.
+    private static async Task ApplyRivalPressureAsync(FullFilledDbContext db)
+    {
+        if (!await ColumnExistsAsync(db, "GameSaves", "RivalJson"))
+            await ExecuteNonQueryAsync(db, "ALTER TABLE GameSaves ADD COLUMN RivalJson TEXT NOT NULL DEFAULT '{}'");
+    }
+
 
     private static async Task ApplyLicenceStatePersistenceAsync(FullFilledDbContext db)
     {

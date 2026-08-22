@@ -147,6 +147,7 @@ app.MapPost("/api/auth/login", async (LoginRequest request, FullFilledDbContext 
             DriverShiftMinutesJson = "{}",
             DriverMoraleJson = "{}",
             RouteMasteryJson = "{}",
+            RivalJson = "{}",
             TutorialStatusJson = "{}",
             ChanceGamesJson = "{}",
             GameTimeMinutes = 480m,
@@ -432,6 +433,7 @@ app.MapPut("/api/saves/{playerId}", async (string playerId, SaveGameRequest requ
     existing.DriverShiftMinutesJson = System.Text.Json.JsonSerializer.Serialize(request.DriverShiftMinutes ?? new Dictionary<string, decimal>());
     existing.DriverMoraleJson = System.Text.Json.JsonSerializer.Serialize(request.DriverMorale ?? new Dictionary<string, decimal>());
     existing.RouteMasteryJson = System.Text.Json.JsonSerializer.Serialize(request.RouteMastery ?? new Dictionary<string, RouteMasteryEntryDto>());
+    existing.RivalJson = System.Text.Json.JsonSerializer.Serialize(request.Rival ?? new Dictionary<string, RivalRouteDto>());
     existing.TutorialStatusJson = System.Text.Json.JsonSerializer.Serialize(request.TutorialStatus ?? new Dictionary<string, string>());
     existing.GameTimeMinutes = Math.Clamp(request.GameTimeMinutes ?? existing.GameTimeMinutes, 0, 1439.999m);
     existing.GameDay = Math.Max(1, request.GameDay ?? existing.GameDay);
@@ -496,6 +498,7 @@ app.MapPost("/api/saves/{playerId}/reset", async (string playerId, FullFilledDbC
     save.DriverShiftMinutesJson = "{}";
     save.DriverMoraleJson = "{}";
     save.RouteMasteryJson = "{}";
+    save.RivalJson = "{}";
     save.TutorialStatusJson = "{}";
     save.ChanceGamesJson = "{}";
     save.GameTimeMinutes = 480m;
@@ -1165,6 +1168,7 @@ static SaveGameResponse ToResponse(GameSave save, bool clamped, decimal offlineI
     System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, decimal>>(save.DriverShiftMinutesJson) ?? new Dictionary<string, decimal>(),
     System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, decimal>>(save.DriverMoraleJson) ?? new Dictionary<string, decimal>(),
     System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, RouteMasteryEntryDto>>(save.RouteMasteryJson) ?? new Dictionary<string, RouteMasteryEntryDto>(),
+    System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, RivalRouteDto>>(save.RivalJson) ?? new Dictionary<string, RivalRouteDto>(),
     System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(save.TutorialStatusJson) ?? new Dictionary<string, string>(),
     ParseChanceGames(save.ChanceGamesJson),
     System.Text.Json.JsonSerializer.Deserialize<List<string>>(save.TerminalUpgradesJson) ?? [],

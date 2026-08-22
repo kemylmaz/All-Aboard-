@@ -1225,5 +1225,14 @@
     "weeklyRent": 1500,
     "inspectionEveryDays": 14,
     "inspectionCost": 1200
+  },
+  "rival": {
+    "poorDaySatisfaction": 55,
+    "recoverSatisfaction": 75,
+    "poorDayNeglect": 2,
+    "idleNeglectPerDay": 1,
+    "neglectToLoseStop": 5,
+    "maxStopsLost": 4,
+    "demandPenaltyPerStop": 0.08
   }
 }

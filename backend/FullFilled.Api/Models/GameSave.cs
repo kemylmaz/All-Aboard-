@@ -25,6 +25,8 @@ public class GameSave
     public string DriverMoraleJson { get; set; } = "{}";
     /// Faz 6: hat basina mastery seviye/XP.
     public string RouteMasteryJson { get; set; } = "{}";
+    /// Rakip firmanın hat başına baskısı: ihmal puanı ve kaybedilen durak sayısı.
+    public string RivalJson { get; set; } = "{}";
     /// Faz 8: parca basina tutorial tamamlanma/atlama durumu ("completed"/"skipped").
     public string TutorialStatusJson { get; set; } = "{}";
     public string ChanceGamesJson { get; set; } = "{}";

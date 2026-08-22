@@ -9,6 +9,7 @@ import { ECONOMY } from "./economy";
 import { getRouteConfig, recommendDriverForRoute, recommendedVehicleTier, masteryLevelForXp, routeRuleId } from "./routeProfile";
 import { useT } from "./i18n";
 import { streakFareMultiplier, useProfileStore } from "./profileStore";
+import { rivalStateFor } from "./rival";
 
 const GOALS: DayGoalId[] = ["earnings", "satisfaction", "safety"];
 
@@ -45,6 +46,7 @@ export function DayStartModal() {
   const routeMastery = useGameStore((s) => s.routeMastery);
   const cityEvent = useGameStore((s) => s.cityEvent);
   const gameDay = useGameStore((s) => s.gameDay);
+  const rival = useGameStore((s) => s.rival);
   const eventPrepared = useGameStore((s) => s.eventPrepared);
   const fetchCityEvent = useGameStore((s) => s.fetchCityEvent);
   const money = useGameStore((s) => s.money);
@@ -175,7 +177,16 @@ export function DayStartModal() {
                 className="ff-day-option flex items-center justify-between px-3 py-2 text-sm"
               >
                 <span>{r.name}</span>
-                {routeId === r.id && <span className="text-amber-600">✓</span>}
+                <span className="flex items-center gap-2">
+                  {/* Rakibin elindeki durak sayısı hat listesinde görünür: hangi
+                      hattın kurtarılmaya ihtiyacı olduğu seçim anında bilinmeli. */}
+                  {rivalStateFor(rival, r.id).stopsLost > 0 && (
+                    <span className="rounded bg-red-400/15 px-1.5 py-0.5 text-[10px] font-black text-red-300">
+                      {t("rival.stopsLost", { count: rivalStateFor(rival, r.id).stopsLost })}
+                    </span>
+                  )}
+                  {routeId === r.id && <span className="text-amber-600">✓</span>}
+                </span>
               </button>
             ))}
           </div>
@@ -191,6 +202,11 @@ export function DayStartModal() {
             </div>
             {/* Hattın kuralı. Sürerken fark edilen bir mekaniği seçim anında
                 söylemezsek oyuncu onu kural değil, aksilik sanır. */}
+            {rivalStateFor(rival, routeId).stopsLost > 0 && (
+              <div className="mt-1.5 rounded-md bg-red-400/10 px-2 py-1.5 font-bold text-red-200">
+                {t("rival.rule")}
+              </div>
+            )}
             {ruleId && (
               <div className="mt-1.5 rounded-md bg-white/8 px-2 py-1.5 font-bold text-sky-200">
                 {t(`route.rule.${ruleId}`)}

@@ -8,6 +8,9 @@ public record OwnedBusDto(string Id, string Name, string? DriverAssignedId, stri
 
 public record RouteMasteryEntryDto(int Level, int Xp);
 
+/// Bir hatta rakip baskısı: biriken ihmal puanı ve rakibe kaptırılan durak.
+public record RivalRouteDto(int NeglectPoints, int StopsLost);
+
 public record ChanceGameResultDto(
     string Id,
     string GameId,
@@ -48,6 +51,7 @@ public record SaveGameRequest(
     Dictionary<string, decimal>? DriverShiftMinutes,
     Dictionary<string, decimal>? DriverMorale,
     Dictionary<string, RouteMasteryEntryDto>? RouteMastery,
+    Dictionary<string, RivalRouteDto>? Rival,
     Dictionary<string, string>? TutorialStatus,
     ChanceGamesDto? ChanceGames,
     List<string>? TerminalUpgrades,
@@ -80,6 +84,7 @@ public record SaveGameResponse(
     Dictionary<string, decimal> DriverShiftMinutes,
     Dictionary<string, decimal> DriverMorale,
     Dictionary<string, RouteMasteryEntryDto> RouteMastery,
+    Dictionary<string, RivalRouteDto> Rival,
     Dictionary<string, string> TutorialStatus,
     ChanceGamesDto ChanceGames,
     List<string> TerminalUpgrades,

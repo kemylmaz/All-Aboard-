@@ -168,6 +168,16 @@ export function DayEndReport() {
           </div>
         )}
 
+        {/* Rakip firma: bugun bir durak kaybedildi mi, geri mi alindi. */}
+        {(report.rivalLostStop || report.rivalRecoveredStop) && (
+          <div
+            data-lost={report.rivalLostStop}
+            className="mt-3 rounded-lg px-3 py-2 text-[11px] font-bold data-[lost=true]:bg-red-400/10 data-[lost=true]:text-red-200 data-[lost=false]:bg-emerald-400/10 data-[lost=false]:text-emerald-200"
+          >
+            {report.rivalLostStop ? t("rival.lostToday") : t("rival.recoveredToday")}
+          </div>
+        )}
+
         {/* Günün hedefi: tutturuldu mu, hedef neydi, prim ne kadar oldu. */}
         <div className="ff-goal-result mt-3" data-met={report.goalMet}>
           <div className="min-w-0">
