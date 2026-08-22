@@ -3070,6 +3070,9 @@ export const useGameStore = create<GameState>((set, get) => {
         driverShiftMinutes: snapshot.driverShiftMinutes ?? {},
         driverMorale: snapshot.driverMorale ?? {},
         routeMastery: snapshot.routeMastery ?? {},
+        // Rakip baskisi kayittan geri yuklenmezse her acilista sifirlanir:
+        // oyuncu kaybettigi duraklari yeniden kazanmis olur.
+        rival: snapshot.rival ?? {},
         chanceGames: normalizeChanceGames(snapshot.chanceGames, snapshot.gameDay ?? s.gameDay),
         servicePlan: snapshot.servicePlan ?? null,
         servicePlanMinutesLeft: Math.max(0, snapshot.servicePlanMinutesLeft ?? 0),

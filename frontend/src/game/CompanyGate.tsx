@@ -304,7 +304,9 @@ export function CompanyGate({ children }: { children: React.ReactNode }) {
               <button
                 type="button"
                 disabled={!canContinue}
-                onClick={() => setStep((value) => value + 1)}
+                // Son adımda durur: art arda iki tık aynı karede iki kez sayılınca
+                // adım aralığın dışına taşıyor ve ekran çevrilmemiş anahtar gösteriyordu.
+                onClick={() => setStep((value) => Math.min(TOTAL_STEPS - 1, value + 1))}
                 className="ff-button ff-button-primary w-full"
               >
                 {t("company.continue")}
