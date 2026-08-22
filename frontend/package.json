@@ -16,7 +16,8 @@
     "deploy:cf": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "predev": "node scripts/sync-shared.mjs",
     "prebuild": "node scripts/sync-shared.mjs",
-    "check:routes": "node scripts/check-route-rules.mjs"
+    "check:routes": "node scripts/check-route-rules.mjs",
+    "check:upkeep": "node scripts/check-upkeep.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",

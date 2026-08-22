@@ -70,6 +70,9 @@ export function DayStartModal() {
   const vehicleTier = recommendedVehicleTier(routeId);
   const masteryLevel = masteryLevelForXp(routeMastery[routeId]?.xp ?? 0);
   const ruleId = routeRuleId(routeId);
+  // Gider takvimi gunun kendisinden turer; ayrica kaydedilmesi gerekmez.
+  const rentDue = gameDay % ECONOMY.upkeep.weeklyRentEveryDays === 0;
+  const inspectionDue = gameDay % ECONOMY.upkeep.inspectionEveryDays === 0;
 
   const start = () => {
     dispatchGameAction("startDay", { routeId, manual, goalId });
@@ -121,6 +124,14 @@ export function DayStartModal() {
               </span>
             )}
           </div>
+        )}
+
+        {/* Kira ve muayene günü önceden duyurulur: gün sonunda sürpriz bir kesinti
+            olarak çıkarsa oyuncu bunu kural değil, kayıp sanır. */}
+        {(rentDue || inspectionDue) && (
+          <p className="mt-2 rounded-md bg-amber-400/10 px-2 py-1.5 text-[11px] font-bold text-amber-200">
+            {rentDue ? t("day.rentDay") : t("day.inspectionDay")}
+          </p>
         )}
 
         {cityEvent?.secondary && (

@@ -78,12 +78,30 @@ export interface DayRunState extends DayRunConfig {
   contractsCompleted: number;
   contractsFailed: number;
 }
+/**
+ * Günün işletme gideri. Kalem kalem tutulur çünkü rapor bunu tek bir "gider"
+ * satırı olarak gösterirse oyuncu parasının nereye gittiğini öğrenemez.
+ */
+export interface UpkeepBreakdown {
+  /** Yakıt ve bakım — sahip olunan her araç için. */
+  fleet: number;
+  /** İşe alınmış şoförlerin günlük maaşı. */
+  salaries: number;
+  /** Haftada bir hat kirası. */
+  rent: number;
+  /** İki haftada bir muayene. */
+  inspection: number;
+  total: number;
+}
+
 export interface DayReportData {
   grade: string;
   score: number;
   xp: number;
   breakdown: DimensionBreakdown[];
   netEarned: number;
+  /** Giderler düşüldükten sonra kasaya kalan. Eksi olabilir. */
+  upkeep: UpkeepBreakdown;
   gameDay: number;
   goalId: DayGoalId;
   /** Günün hedefi tutturuldu mu? Tutunca net kazancın bir oranı prim olarak ödenir. */
@@ -727,6 +745,28 @@ interface GameState {
 // ---------------------------------------------------------------------------
 // Yardımcı fonksiyonlar
 // ---------------------------------------------------------------------------
+
+/**
+ * Bir günün işletme gideri. Şimdiye kadar hiçbir şey tahsil edilmiyordu: para
+ * yalnızca artıyor, dolayısıyla bir süre sonra anlamını yitiriyordu. Filo
+ * büyüdükçe gider de büyür — araç almak bir karar hâline gelir.
+ * Sayılar: shared/economy.json > upkeep
+ */
+function computeDayUpkeep(
+  ownedBusCount: number,
+  hiredDriverIds: string[],
+  gameDay: number,
+): UpkeepBreakdown {
+  const config = ECONOMY.upkeep;
+  const fleet = Math.max(1, ownedBusCount) * config.busPerDay;
+  const salaries = hiredDriverIds.reduce((total, driverId) => {
+    const driver = ECONOMY.drivers.find((d) => d.id === driverId);
+    return total + (driver ? getDriverDailySalary(driver) : 0);
+  }, 0);
+  const rent = gameDay % config.weeklyRentEveryDays === 0 ? config.weeklyRent : 0;
+  const inspection = gameDay % config.inspectionEveryDays === 0 ? config.inspectionCost : 0;
+  return { fleet, salaries, rent, inspection, total: fleet + salaries + rent + inspection };
+}
 
 function isNightTime(gameTimeMinutes: number): boolean {
   const hour = Math.floor(gameTimeMinutes / 60) % 24;
@@ -2400,8 +2440,19 @@ export const useGameStore = create<GameState>((set, get) => {
         : goals.safety.moneyBonusRatio;
       const goalBonus = goalMet ? Math.max(0, run.netEarned) * bonusRatio : 0;
 
+      // Günün işletme gideri: yakıt/bakım, maaşlar, haftalık kira, muayene.
+      // Bugüne kadar hiçbiri tahsil edilmiyordu — filo büyütmenin bedeli yoktu.
+      const hiredDriverIds = [
+        ...new Set(
+          Object.values(s.driverAssignments)
+            .flatMap((shifts) => Object.values(shifts))
+            .filter((id): id is string => Boolean(id)),
+        ),
+      ];
+      const upkeep = computeDayUpkeep(s.ownedBuses.length, hiredDriverIds, run.startedAtGameDay);
+
       set({
-        money: s.money + goalBonus,
+        money: Math.max(0, s.money + goalBonus - upkeep.total),
         dayRun: null,
         lapRun: null,
         lapReport: null,
@@ -2413,6 +2464,7 @@ export const useGameStore = create<GameState>((set, get) => {
           xp: result.xp,
           breakdown: result.breakdown,
           netEarned: Math.round(run.netEarned),
+          upkeep,
           gameDay: run.startedAtGameDay,
           goalId: run.goalId,
           goalMet,

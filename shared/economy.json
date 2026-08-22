@@ -1217,5 +1217,13 @@
     "bonusPerDay": 0.03,
     "maxBonus": 0.3,
     "graceDays": 1
+  },
+  "upkeep": {
+    "busPerDay": 250,
+    "driverSalaryCharged": true,
+    "weeklyRentEveryDays": 7,
+    "weeklyRent": 1500,
+    "inspectionEveryDays": 14,
+    "inspectionCost": 1200
   }
 }
