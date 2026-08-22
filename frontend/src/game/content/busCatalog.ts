@@ -60,7 +60,7 @@ export const BUS_CATALOG: readonly BusCatalogEntry[] = [
     modelId: "midibus",
     seats: 14,
     speedMultiplier: 1.05,
-    price: 135_000,
+    price: 22000,
     note: "İlk ciddi yükseltme: belirgin koltuk artışı, dengeli hız.",
   },
   {
@@ -70,7 +70,7 @@ export const BUS_CATALOG: readonly BusCatalogEntry[] = [
     modelId: "premium",
     seats: 20,
     speedMultiplier: 1.15,
-    price: 360_000,
+    price: 60000,
     note: "Geniş, hızlı ve prestijli; yoğun hatlarda kazancı katlar.",
   },
 ] as const;

@@ -1,9 +1,9 @@
 {
   "fare": {
-    "full": 40,
-    "student": 30,
-    "tipMin": 10,
-    "tipMax": 60
+    "full": 90,
+    "student": 65,
+    "tipMin": 25,
+    "tipMax": 140
   },
   "bus": {
     "baseSeatCapacity": 10,
@@ -11,9 +11,9 @@
   },
   "extraBuses": {
     "purchaseCosts": [
-      160000,
-      240000,
-      350000
+      30000,
+      55000,
+      90000
     ],
     "colors": [
       "#f59e0b",
@@ -26,8 +26,8 @@
       "Dolmuş #3",
       "Dolmuş #4"
     ],
-    "idleIncomePerSecond": 18,
-    "dailyGrossIncome": 19000
+    "idleIncomePerSecond": 0.2,
+    "dailyGrossIncome": 2100
   },
   "drivers": [
     {
@@ -37,9 +37,9 @@
       "speedMultiplier": 1.3,
       "efficiency": 0.72,
       "salaryShare": 0.18,
-      "hireCost": 18000,
+      "hireCost": 3200,
       "portraitPath": "/drivers/sofor-01.png",
-      "dailySalary": 2700,
+      "dailySalary": 490,
       "punctuality": 0.55,
       "service": 0.4,
       "reliability": 0.45,
@@ -60,9 +60,9 @@
       "speedMultiplier": 1,
       "efficiency": 0.88,
       "salaryShare": 0.12,
-      "hireCost": 22000,
+      "hireCost": 4000,
       "portraitPath": "/drivers/sofor-02.png",
-      "dailySalary": 2200,
+      "dailySalary": 400,
       "punctuality": 0.7,
       "service": 0.8,
       "reliability": 0.8,
@@ -83,9 +83,9 @@
       "speedMultiplier": 1.1,
       "efficiency": 0.82,
       "salaryShare": 0.14,
-      "hireCost": 20000,
+      "hireCost": 3600,
       "portraitPath": "/drivers/sofor-03.png",
-      "dailySalary": 2400,
+      "dailySalary": 430,
       "punctuality": 0.65,
       "service": 0.55,
       "reliability": 0.8,
@@ -106,9 +106,9 @@
       "speedMultiplier": 1.2,
       "efficiency": 0.67,
       "salaryShare": 0.2,
-      "hireCost": 15000,
+      "hireCost": 2700,
       "portraitPath": "/drivers/sofor-04.png",
-      "dailySalary": 2900,
+      "dailySalary": 520,
       "punctuality": 0.5,
       "service": 0.85,
       "reliability": 0.55,
@@ -129,9 +129,9 @@
       "speedMultiplier": 0.95,
       "efficiency": 0.94,
       "salaryShare": 0.1,
-      "hireCost": 28000,
+      "hireCost": 5000,
       "portraitPath": "/drivers/sofor-05.png",
-      "dailySalary": 2500,
+      "dailySalary": 450,
       "punctuality": 0.9,
       "service": 0.85,
       "reliability": 0.88,
@@ -152,9 +152,9 @@
       "speedMultiplier": 0.9,
       "efficiency": 0.84,
       "salaryShare": 0.1,
-      "hireCost": 16000,
+      "hireCost": 2900,
       "portraitPath": "/drivers/sofor-06.png",
-      "dailySalary": 1700,
+      "dailySalary": 310,
       "punctuality": 0.75,
       "service": 0.7,
       "reliability": 0.85,
@@ -175,9 +175,9 @@
       "speedMultiplier": 1.15,
       "efficiency": 0.76,
       "salaryShare": 0.16,
-      "hireCost": 19000,
+      "hireCost": 3400,
       "portraitPath": "/drivers/sofor-07.png",
-      "dailySalary": 2300,
+      "dailySalary": 410,
       "punctuality": 0.6,
       "service": 0.75,
       "reliability": 0.55,
@@ -198,9 +198,9 @@
       "speedMultiplier": 1.35,
       "efficiency": 0.58,
       "salaryShare": 0.22,
-      "hireCost": 13000,
+      "hireCost": 2300,
       "portraitPath": "/drivers/sofor-08.png",
-      "dailySalary": 3000,
+      "dailySalary": 540,
       "punctuality": 0.45,
       "service": 0.35,
       "reliability": 0.3,
@@ -221,9 +221,9 @@
       "speedMultiplier": 0.85,
       "efficiency": 0.96,
       "salaryShare": 0.08,
-      "hireCost": 30000,
+      "hireCost": 5400,
       "portraitPath": "/drivers/sofor-09.png",
-      "dailySalary": 1900,
+      "dailySalary": 340,
       "punctuality": 0.92,
       "service": 0.9,
       "reliability": 0.95,
@@ -244,9 +244,9 @@
       "speedMultiplier": 1,
       "efficiency": 0.78,
       "salaryShare": 0.14,
-      "hireCost": 18000,
+      "hireCost": 3200,
       "portraitPath": "/drivers/sofor-10.png",
-      "dailySalary": 2100,
+      "dailySalary": 380,
       "punctuality": 0.65,
       "service": 0.65,
       "reliability": 0.65,
@@ -267,9 +267,9 @@
       "speedMultiplier": 1.25,
       "efficiency": 0.62,
       "salaryShare": 0.2,
-      "hireCost": 14000,
+      "hireCost": 2500,
       "portraitPath": "/drivers/sofor-11.png",
-      "dailySalary": 2800,
+      "dailySalary": 500,
       "punctuality": 0.5,
       "service": 0.4,
       "reliability": 0.4,
@@ -290,9 +290,9 @@
       "speedMultiplier": 1.1,
       "efficiency": 0.86,
       "salaryShare": 0.12,
-      "hireCost": 24000,
+      "hireCost": 4300,
       "portraitPath": "/drivers/sofor-12.png",
-      "dailySalary": 2400,
+      "dailySalary": 430,
       "punctuality": 0.7,
       "service": 0.78,
       "reliability": 0.68,
@@ -313,9 +313,9 @@
       "speedMultiplier": 1.05,
       "efficiency": 0.9,
       "salaryShare": 0.12,
-      "hireCost": 26000,
+      "hireCost": 4700,
       "portraitPath": "/drivers/sofor-13.png",
-      "dailySalary": 2350,
+      "dailySalary": 420,
       "punctuality": 0.78,
       "service": 0.75,
       "reliability": 0.85,
@@ -336,9 +336,9 @@
       "speedMultiplier": 0.98,
       "efficiency": 0.97,
       "salaryShare": 0.09,
-      "hireCost": 32000,
+      "hireCost": 5800,
       "portraitPath": "/drivers/sofor-14.png",
-      "dailySalary": 2250,
+      "dailySalary": 410,
       "punctuality": 0.95,
       "service": 0.82,
       "reliability": 0.9,
@@ -359,9 +359,9 @@
       "speedMultiplier": 1.18,
       "efficiency": 0.74,
       "salaryShare": 0.17,
-      "hireCost": 17500,
+      "hireCost": 3200,
       "portraitPath": "/drivers/sofor-15.png",
-      "dailySalary": 2650,
+      "dailySalary": 480,
       "punctuality": 0.68,
       "service": 0.6,
       "reliability": 0.72,
@@ -382,9 +382,9 @@
       "speedMultiplier": 1.08,
       "efficiency": 0.92,
       "salaryShare": 0.11,
-      "hireCost": 29000,
+      "hireCost": 5200,
       "portraitPath": "/drivers/sofor-16.png",
-      "dailySalary": 2450,
+      "dailySalary": 440,
       "punctuality": 0.8,
       "service": 0.8,
       "reliability": 0.88,
@@ -401,17 +401,17 @@
   ],
   "upgrades": {
     "motorCosts": [
-      800,
-      2500,
-      7000,
-      18000,
-      45000
+      1800,
+      5500,
+      15000,
+      38000,
+      95000
     ],
     "motorSpeedBonusPerLevel": 0.15,
     "seatCosts": [
-      1500,
-      5000,
-      15000
+      3200,
+      11000,
+      32000
     ],
     "seatCapacityLevels": [
       10,
@@ -425,7 +425,7 @@
       8000
     ],
     "soundSatisfactionPerSecondPerLevel": 0.03,
-    "cashRegisterCost": 2500
+    "cashRegisterCost": 5500
   },
   "offRoute": {
     "offerChance": 0.15,
@@ -439,11 +439,11 @@
     "firstCatchPenaltyMultiplier": 2
   },
   "secondLine": {
-    "openCost": 300000,
+    "openCost": 120000,
     "wealthMultiplier": 1.5,
-    "driverHireCost": 120000,
-    "idleIncomePerSecond": 24,
-    "dailyGrossIncome": 26000
+    "driverHireCost": 20000,
+    "idleIncomePerSecond": 0.3,
+    "dailyGrossIncome": 3000
   },
   "idle": {
     "offlineCapHours": 8
@@ -531,13 +531,13 @@
     "maxCombinedRiskMultiplier": 1.5,
     "detourRiskGainPerSecond": 10,
     "fines": [
-      1500,
-      3500,
-      9000,
-      25000
+      1200,
+      2800,
+      6000,
+      12000
     ],
     "suspensionGameMinutes": 180,
-    "newVehicleCost": 850000,
+    "newVehicleCost": 90000,
     "satisfactionPenalty": 10,
     "riskDecayPerSecond": 1.1,
     "riskAfterPenalty": 0,
@@ -785,176 +785,176 @@
     "offrouteRewardPerTrip": 150
   },
   "chanceGames": {
-    "dailyBudgetLimit": 50000,
+    "dailyBudgetLimit": 8000,
     "recentResultLimit": 8,
     "minimumReserve": 0,
-    "performanceBoostMaxRatio": 0.5,
-    "largeWinThreshold": 150000,
+    "performanceBoostMaxRatio": 0.15,
+    "largeWinThreshold": 20000,
     "wheel": {
-      "stake": 2500,
+      "stake": 600,
       "maxSpinsPerDay": 5,
       "segments": [
         {
           "id": "empty",
           "label": "Boş",
           "multiplier": 0,
-          "weight": 30,
+          "weight": 50,
           "tone": "muted"
+        },
+        {
+          "id": "refund",
+          "label": "Para İadesi",
+          "multiplier": 1,
+          "weight": 18,
+          "tone": "blue"
         },
         {
           "id": "small",
           "label": "Küçük Ödül",
           "multiplier": 1.2,
-          "weight": 28,
+          "weight": 18,
           "tone": "blue"
         },
         {
           "id": "medium",
           "label": "Orta Ödül",
           "multiplier": 2,
-          "weight": 18,
+          "weight": 9,
           "tone": "green"
         },
         {
           "id": "jackpot",
           "label": "Mahalle Şansı",
           "multiplier": 5,
-          "weight": 7,
+          "weight": 4,
           "tone": "gold"
         },
         {
           "id": "rare",
           "label": "Büyük Patlama",
           "multiplier": 20,
-          "weight": 1,
-          "tone": "red"
-        },
-        {
-          "id": "cashback",
-          "label": "Para İadesi",
-          "multiplier": 1,
-          "weight": 16,
-          "tone": "amber"
+          "weight": 0.4,
+          "tone": "gold"
         }
       ]
     },
     "plate": {
-      "stake": 10000,
+      "stake": 1500,
       "multiplier": 1.8,
       "maxPlaysPerDay": 5
     },
     "lottery": {
-      "ticketCost": 25000,
+      "ticketCost": 4000,
       "maxTicketsPerDay": 2,
       "prizes": [
         {
           "id": "none",
           "label": "Bilet yanış",
           "amount": 0,
-          "weight": 72,
+          "weight": 82,
           "tone": "muted"
         },
         {
           "id": "small",
           "label": "Küçük ikramiye",
-          "amount": 75000,
-          "weight": 18,
+          "amount": 6500,
+          "weight": 14,
           "tone": "blue"
         },
         {
           "id": "medium",
           "label": "Orta ikramiye",
-          "amount": 350000,
-          "weight": 7,
+          "amount": 24000,
+          "weight": 3,
           "tone": "green"
         },
         {
           "id": "large",
           "label": "Büyük ikramiye",
-          "amount": 1500000,
-          "weight": 2.5,
+          "amount": 130000,
+          "weight": 0.8,
           "tone": "gold"
         },
         {
-          "id": "jackpot",
+          "id": "garage",
           "label": "Garaj ikramiyesi",
-          "amount": 5000000,
-          "weight": 0.5,
-          "tone": "red"
+          "amount": 480000,
+          "weight": 0.15,
+          "tone": "gold"
         }
       ]
     },
     "envelope": {
-      "stake": 15000,
+      "stake": 2500,
       "maxPlaysPerDay": 3,
       "outcomes": [
         {
           "id": "lose",
           "label": "Boş zarf",
           "payout": 0,
-          "weight": 45,
+          "weight": 62,
           "tone": "red"
         },
         {
           "id": "refund",
           "label": "Zarf iadesi",
-          "payout": 15000,
-          "weight": 20,
+          "payout": 2500,
+          "weight": 16,
           "tone": "muted"
         },
         {
           "id": "double",
           "label": "Kalın zarf",
-          "payout": 45000,
-          "weight": 25,
+          "payout": 6000,
+          "weight": 15,
           "tone": "green"
         },
         {
           "id": "rare",
           "label": "Muhtar zarfı",
-          "payout": 150000,
-          "weight": 10,
+          "payout": 17000,
+          "weight": 3,
           "tone": "gold"
         }
       ]
     },
     "coupon": {
-      "stake": 12000,
+      "stake": 2000,
       "maxPlaysPerDay": 4,
       "outcomes": [
         {
           "id": "miss",
           "label": "Kupon yattı",
           "payout": 0,
-          "weight": 50,
+          "weight": 68,
           "tone": "red"
         },
         {
           "id": "twoLegs",
           "label": "2 durak tuttu",
-          "payout": 30000,
-          "weight": 26,
+          "payout": 3000,
+          "weight": 19,
           "tone": "blue"
         },
         {
           "id": "threeLegs",
           "label": "3 durak tuttu",
-          "payout": 90000,
-          "weight": 12,
+          "payout": 9000,
+          "weight": 6,
           "tone": "green"
         },
         {
           "id": "full",
           "label": "Tam kupon",
-          "payout": 300000,
-          "weight": 2,
+          "payout": 9000,
+          "weight": 6,
           "tone": "gold"
         },
         {
           "id": "maintenanceVoucher",
           "label": "Bakım kuponu",
           "payout": 0,
-          "weight": 6,
+          "weight": 4,
           "tone": "blue",
           "rewardType": "maintenanceCoupon"
         },
@@ -962,49 +962,49 @@
           "id": "contractReroll",
           "label": "Kontrat yenileme",
           "payout": 0,
-          "weight": 4,
+          "weight": 3,
           "tone": "muted",
           "rewardType": "contractReroll"
         }
       ]
     },
     "tombala": {
-      "stake": 8000,
+      "stake": 1500,
       "maxPlaysPerDay": 3,
       "outcomes": [
         {
           "id": "none",
           "label": "Kart boş",
           "payout": 0,
-          "weight": 45,
+          "weight": 66,
           "tone": "red"
         },
         {
           "id": "line",
           "label": "Bir sıra",
-          "payout": 20000,
-          "weight": 28,
+          "payout": 2200,
+          "weight": 22,
           "tone": "blue"
         },
         {
           "id": "half",
           "label": "Yarım kart",
-          "payout": 70000,
-          "weight": 13,
+          "payout": 7000,
+          "weight": 7,
           "tone": "green"
         },
         {
           "id": "full",
           "label": "Minibüsçü tombalası",
-          "payout": 250000,
-          "weight": 3,
+          "payout": 22000,
+          "weight": 0.6,
           "tone": "gold"
         },
         {
           "id": "cosmetic",
           "label": "Kaporta rengi",
           "payout": 0,
-          "weight": 6,
+          "weight": 5,
           "tone": "blue",
           "rewardType": "cosmetic",
           "cosmeticId": "bus-livery-01"
@@ -1013,7 +1013,7 @@
           "id": "eventBox",
           "label": "Hazırlık kutusu",
           "payout": 0,
-          "weight": 5,
+          "weight": 4,
           "tone": "gold",
           "rewardType": "eventPrep",
           "eventOnly": true
@@ -1057,7 +1057,7 @@
         "legal": false
       }
     ],
-    "mainBusDailyGrossIncome": 21000,
+    "mainBusDailyGrossIncome": 2100,
     "nightIncomeMultiplier": 0.85,
     "illegalNightPoliceRiskPerSecond": 0.018
   },
@@ -1397,23 +1397,63 @@
   "licence": {
     "maxPoints": 100,
     "suspensionSeconds": 30,
-    "suspensionFine": 2500,
-    "speeding": { "points": 5, "riskPerSecond": 1, "riskThreshold": 15, "fine": 400 },
-    "offRoute": { "points": 50, "risk": 20, "riskThreshold": 75, "fine": 1200 },
-    "overflow": { "points": 30, "risk": 10, "riskThreshold": 50, "fine": 800 },
-    "shortChange": { "points": 20, "count": 5, "fine": 600 },
+    "suspensionFine": 2000,
+    "speeding": {
+      "points": 5,
+      "riskPerSecond": 1,
+      "riskThreshold": 15,
+      "fine": 350
+    },
+    "offRoute": {
+      "points": 50,
+      "risk": 20,
+      "riskThreshold": 75,
+      "fine": 1000
+    },
+    "overflow": {
+      "points": 30,
+      "risk": 10,
+      "riskThreshold": 50,
+      "fine": 700
+    },
+    "shortChange": {
+      "points": 20,
+      "count": 5,
+      "fine": 500
+    },
     "riskDecayPerSecond": 1.4
   },
   "dayGoals": {
-    "earnings": { "targetNet": 1200, "moneyBonusRatio": 0.2 },
-    "satisfaction": { "targetSatisfaction": 70, "moneyBonusRatio": 0.12 },
-    "safety": { "maxViolations": 0, "moneyBonusRatio": 0.15 }
+    "earnings": {
+      "targetNet": 3000,
+      "moneyBonusRatio": 0.2
+    },
+    "satisfaction": {
+      "targetSatisfaction": 70,
+      "moneyBonusRatio": 0.12
+    },
+    "safety": {
+      "maxViolations": 0,
+      "moneyBonusRatio": 0.15
+    }
   },
   "progression": {
     "strategies": {
-      "service": { "satisfactionGainMultiplier": 1.35, "policeRiskMultiplier": 1, "fleetIncomeMultiplier": 1 },
-      "operations": { "satisfactionGainMultiplier": 1, "policeRiskMultiplier": 0.8, "fleetIncomeMultiplier": 1 },
-      "growth": { "satisfactionGainMultiplier": 1, "policeRiskMultiplier": 1, "fleetIncomeMultiplier": 1.2 }
+      "service": {
+        "satisfactionGainMultiplier": 1.35,
+        "policeRiskMultiplier": 1,
+        "fleetIncomeMultiplier": 1
+      },
+      "operations": {
+        "satisfactionGainMultiplier": 1,
+        "policeRiskMultiplier": 0.8,
+        "fleetIncomeMultiplier": 1
+      },
+      "growth": {
+        "satisfactionGainMultiplier": 1,
+        "policeRiskMultiplier": 1,
+        "fleetIncomeMultiplier": 1.2
+      }
     },
     "maxLevel": 30,
     "levelThresholds": [

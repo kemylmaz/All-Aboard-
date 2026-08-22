@@ -284,13 +284,13 @@ public static class EconomyConstants
     public static readonly Dictionary<string, decimal> RouteUnlockCosts = new()
     {
         ["starter-center"] = 0m,
-        ["main-city"] = 1_500_000m,
-        ["north-loop"] = 1_850_000m,
-        ["west-worker"] = 2_350_000m,
-        ["east-express"] = 2_600_000m,
-        ["south-coast"] = 3_200_000m,
-        ["premium-outer"] = 3_600_000m,
-        ["grand-ring"] = 5_400_000m,
+        ["main-city"] = 25000m,
+        ["north-loop"] = 60000m,
+        ["west-worker"] = 110000m,
+        ["east-express"] = 180000m,
+        ["south-coast"] = 280000m,
+        ["premium-outer"] = 400000m,
+        ["grand-ring"] = 650000m,
     };
 
     /// Frontend content/busCatalog.ts ile senkron tutulmali (id + price).
@@ -299,8 +299,8 @@ public static class EconomyConstants
         ["hurda-mavi"] = 0m,
         ["hurda-sari"] = 0m,
         ["hurda-yesil"] = 0m,
-        ["midibus"] = 135_000m,
-        ["premium"] = 360_000m,
+        ["midibus"] = 22000m,
+        ["premium"] = 60000m,
     };
 
     /// Frontend terminal.ts ile senkron tutulmali (id + cost).
